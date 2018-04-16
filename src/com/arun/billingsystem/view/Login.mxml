@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 width="100%" height="100%" creationComplete="login_creationCompleteHandler()"
+		 initialize="loadApp_handler()">
+	<s:states>
+		<mx:State name="DontShowMachineName" />
+		<mx:State name="ShowMachineName" />
+	</s:states>
+	<fx:Metadata>
+		[ResourceBundle("myLocale")]
+	</fx:Metadata>
+	<fx:Script>
+		<![CDATA[
+			import com.arun.billingsystem.common.Constant;
+			import com.arun.billingsystem.controller.LoginController;
+			import com.arun.billingsystem.domain.LoadApp;
+			import com.arun.billingsystem.domain.User;
+			import com.arun.billingsystem.event.RootEvent;
+			import com.arun.billingsystem.util.ResourceUtil;
+			import com.arun.billingsystem.view.popups.SettingPopUp;
+			import com.arun.billingsystem.view.popups.ShowAlert;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.remoting.RemoteObject;
+			import mx.utils.StringUtil;
+			
+			[Dispatcher]public var dispatch:IEventDispatcher;
+			public static var loadApp:LoadApp;
+			public var hostName:String = "";
+			
+			private var loginRemoteObject:RemoteObject = ResourceUtil.getRemoteService("loginController");
+			
+			public function loadApp_handler():void {
+				loginRemoteObject.loadApp();
+				loginRemoteObject.addEventListener(ResultEvent.RESULT, loadAppResultHandler);
+				loginRemoteObject.addEventListener(FaultEvent.FAULT, loadAppFaultHandler);
+			}
+			
+			public function loadAppResultHandler(result:ResultEvent):void {
+				var loadApp:LoadApp = result.result as LoadApp;
+				Login.loadApp = loadApp;
+				if(loadApp.name == null || loadApp.name == "" || loadApp.categorys == null || loadApp.categorys.length == 0 
+					|| loadApp.sizeList == null || loadApp.sizeList.length == 0){
+					SettingPopUp.show(loadApp);
+				} else {
+					loadDetail(loadApp);	
+				}
+			}
+			
+			private function loadDetail(loadApp:LoadApp):void {
+				nameLbl.text = loadApp.name;
+				if(loadApp.showMachineName){
+					currentState = "ShowMachineName";
+				} else {
+					currentState = "DontShowMachineName";
+				}
+			}
+			
+			public function loadAppFaultHandler(fault:FaultEvent):void {
+				ShowAlert.show(fault.fault.faultString, Constant.POP_UP, Constant.SHOW_IMG_WAR);
+			}
+			
+			public function splitmachine(machineName:String):ArrayCollection {
+				var arryCol:ArrayCollection = new ArrayCollection();
+				if(machineName != "" || machineName != null){
+					if(machineName.indexOf(",") > 0){
+						arryCol.source = machineName.split(",");
+					} else {
+						arryCol.addItem(machineName);
+					}
+				}
+				return arryCol;
+			}
+			
+			protected function login_clickHandler():void
+			{
+				loadApp.username = StringUtil.trim(userNameTxtInput.text);
+				loadApp.password = StringUtil.trim(passwordTxtInput.text);
+				if(loadApp.showMachineName) {
+					if(machineNameCmbBox != null)
+						loadApp.hostName = StringUtil.trim(machineNameCmbBox.selectedItem);
+				} else {
+					loadApp.hostName = StringUtil.trim(hostName);
+				}
+				var rootEvent:RootEvent = new RootEvent(RootEvent.EVENT_LOGIN);
+				rootEvent.loadApp = loadApp;
+				dispatch.dispatchEvent(rootEvent);
+			}
+			
+			public function login_creationCompleteHandler():void
+			{
+				userNameTxtInput.text = "";
+				passwordTxtInput.text = "";
+				userNameTxtInput.setFocus();
+			}
+			
+			[EventHandler(event="RootEvent.EVENT_LOGOUT", properties="loadApp")]
+			public function signout_handler(loadApp:LoadApp):void {
+				Login.loadApp = loadApp;
+				loadDetail(loadApp);
+				passwordTxtInput.text = "";
+				passwordTxtInput.setFocus();
+			}
+			
+			protected function login_keyDownHandler(event:KeyboardEvent):void
+			{
+				if(event.keyCode == Keyboard.ENTER){
+					login_clickHandler();
+				}
+			}
+			
+			protected function vgroup1_creationCompleteHandler():void {
+				if(loadApp.showMachineName){
+					currentState = "ShowMachineName";
+					machineNameCmbBox.dataProvider = splitmachine(loadApp.machineName);
+					machineNameCmbBox.selectedIndex = 0;
+				} else {
+					currentState = "DontShowMachineName";
+					hostName = splitmachine(loadApp.machineName).getItemAt(0) as String;
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:Panel width="100%" height="100%" skinClass="skins.CustomPanelSkin">
+		<s:VGroup width="100%" height="100%" gap="50">
+			<s:HGroup width="100%" height="100%">
+				<s:Label id="nameLbl" fontSize="48" top="50" horizontalCenter="0" fontFamily="Papyrus"/>
+			</s:HGroup>
+			<s:HGroup width="100%" height="100%" gap="50">
+				<s:VGroup width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+					<mx:HBox verticalAlign="middle">
+						<mx:Label text="Username:" />
+						<s:TextInput id="userNameTxtInput" styleName="TextInputStyle" />
+					</mx:HBox>
+					<mx:HBox verticalAlign="middle">
+						<mx:Label text="Password:" />
+						<s:TextInput id="passwordTxtInput" styleName="TextInputStyle" displayAsPassword="true" enter="login_clickHandler()"/>
+					</mx:HBox>
+					<!--<mx:HBox verticalAlign="middle">
+						<mx:Label text="Machine Name:" />
+						<s:TextInput id="machineNameTxtInput" styleName="TextInputStyle" text="APP"/>
+					</mx:HBox>-->
+					<mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
+						<s:Button label="Login" click="login_clickHandler()" styleName="DefaultGoldButton" keyDown="login_keyDownHandler(event)"/>
+						<s:Button label="Reset" click="login_creationCompleteHandler()" styleName="DefaultButton"/>
+					</mx:HBox>
+				</s:VGroup>
+				<s:VGroup width="100%" height="100%">
+					<s:Image source="./images/babyImage.png"/>
+					<mx:HBox verticalAlign="bottom" width="100%" horizontalAlign="right" includeIn="ShowMachineName" creationComplete="vgroup1_creationCompleteHandler()">
+						<mx:Label text="Machine Name:" />
+						<s:ComboBox id="machineNameCmbBox" width="60" styleName="ComboBoxStyle" tabIndex="-1"/>
+					</mx:HBox>
+				</s:VGroup>
+			</s:HGroup>
+		</s:VGroup>
+	</s:Panel>
+</s:Group>

@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:view="com.arun.billingsystem.view.*" width="100%" height="100%"
+		 creationComplete="reportPresentation.search_creationCompleteHandler(true)">
+	<s:states>
+		<mx:State name="DontShowCardDebit" />
+		<mx:State name="ShowCard" />
+		<mx:State name="ShowDebit" />
+		<mx:State name="ShowCardDebit" />
+	</s:states>
+	<fx:Script>
+		<![CDATA[
+			import com.arun.billingsystem.common.Constant;
+			import com.arun.billingsystem.domain.Search;
+			import com.arun.billingsystem.model.presentation.ReportPresentation;
+			import com.arun.billingsystem.util.FormatUtil;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.CalendarLayoutChangeEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			
+			[Bindable][Embed(source="./images/Report.png")]
+			private var ReportImg:Class;
+			[Bindable][Embed(source="./images/Sales.png")]
+			private var SalesImg:Class;
+			[Inject(source="reportPresentation")]
+			public var reportPresentation:ReportPresentation;
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<mx:DateField id="toDate" formatString="{FormatUtil.DATE_PICKER_FORMAT}" selectedDate="{new Date()}" 
+					  change="reportPresentation.toDate_changeHandler()" />
+	</fx:Declarations>
+	<s:VGroup width="100%" height="100%">
+		<s:BorderContainer width="100%" styleName="panelStyle">
+			<s:HGroup width="100%" paddingLeft="5" paddingTop="10">
+				<mx:LinkButton icon="@Embed('./images/icon/sales_32.png')" id="saleReportLnkBut" label="Sales Report" click="reportPresentation.salesMenu_buttonBarClickHanlder()"/>
+				<mx:VRule height="30" />
+				<mx:LinkButton icon="@Embed('./images/icon/employee_32.png')" id="employeeLnkBut" label="Employee Report" click="reportPresentation.employeeMenu_buttonBarClickHanlder()"/>
+				<mx:VRule height="30" />
+				<mx:LinkButton icon="@Embed('./images/icon/purchase_32.png')" id="purchaseLnkBut" label="Purchase Report" click="reportPresentation.purchaseMenu_buttonBarClickHanlder()"/>
+				<s:HGroup width="100%" horizontalAlign="right">
+					<mx:DateField id="showFromDate" visible="false" selectedDate="{new Date()}" formatString="{FormatUtil.DATE_PICKER_FORMAT}" 
+								  change="reportPresentation.search_creationCompleteHandler(false, true)"/>
+				</s:HGroup>
+			</s:HGroup>
+		</s:BorderContainer>
+		<mx:HRule width="100%" />
+		<mx:ViewStack id="reportViewStack" width="100%" height="100%">
+			<s:NavigatorContent width="100%" height="100%">
+				<s:VGroup width="100%" height="100%">
+					<s:HGroup width="100%" paddingBottom="5" paddingTop="5" paddingLeft="5" paddingRight="5">
+						
+						<s:VGroup width="180">
+							<mx:DateChooser id="fromDate" height="180" selectedDate="{new Date()}" change="reportPresentation.search_creationCompleteHandler(false)"/>
+						</s:VGroup>
+						
+						<mx:VBox width="100%" height="100%" verticalAlign="middle" horizontalAlign="center" styleName="vboxBorder">
+							<s:VGroup width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+								<mx:Label text="Cash Amount" styleName="TextStyle" />
+								<mx:Text id="cashAmtTxt" styleName="TotalStyle"  />
+							</s:VGroup>
+							<mx:HRule width="100%" />
+							<s:VGroup width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+								<mx:Label text="Cash Pics" styleName="TextStyle" />
+								<mx:Text id="cashQtyTxt" styleName="PicStyle"/>
+							</s:VGroup>
+						</mx:VBox>
+						
+						<mx:VBox width="70%" height="100%" verticalAlign="middle" horizontalAlign="center" styleName="vboxBorder" includeIn="ShowCard, ShowCardDebit">
+							<s:VGroup width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+								<mx:Label text="Card Amount" styleName="TextStyle" />
+								<mx:Text styleName="TotalStyle" id="cardAmtText" />
+							</s:VGroup>
+							<mx:HRule width="100%" />
+							<s:VGroup width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+								<mx:Label text="Card Pics" styleName="TextStyle" />
+								<mx:Text id="cardQtyTxt" styleName="PicStyle"/>
+							</s:VGroup>
+						</mx:VBox>
+						<mx:VBox width="70%" height="100%" verticalAlign="middle" horizontalAlign="center">
+							<mx:DataGrid id="showCashierDG" width="100%" height="100%" focusEnabled="false" horizontalScrollPolicy="off"
+										 verticalScrollPolicy="auto" styleName="CustomDataGrid">
+								<mx:columns>
+									<mx:DataGridColumn dataField="fullName" headerText="Name" headerStyleName="dataGridHeaderStyle" />
+									<mx:DataGridColumn dataField="totalQty" headerText="Total Pics" width="80" headerStyleName="dataGridHeaderStyle" />
+									<mx:DataGridColumn dataField="salesTotal" headerText="Total Amount" width="100" headerStyleName="dataGridHeaderStyle" />
+								</mx:columns>
+							</mx:DataGrid>
+							<!--<s:VGroup width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+								<mx:Label text="Debit Amount" styleName="TextStyle" />
+								<mx:Text styleName="TotalStyle" id="debitAmtText" />
+							</s:VGroup>
+							<mx:HRule width="100%"/>
+							<s:VGroup width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+								<mx:Label text="Debit Pics" styleName="TextStyle" />
+								<mx:Text id="debitQtyTxt" styleName="PicStyle"/>
+							</s:VGroup>-->
+						</mx:VBox>
+						<!--<mx:VBox height="100%">
+							<s:HGroup>
+								<mx:LinkButton icon="@Embed('./images/icon/refresh_32.png')" id="refresh" toolTip="Refresh" click="reportPresentation.refreshButtonClick()"/>
+							</s:HGroup>
+						</mx:VBox>-->
+					</s:HGroup>
+					
+					<mx:HRule width="100%" />
+					<s:HGroup width="100%" height="100%">
+						<s:HGroup width="50%" height="100%" paddingLeft="5" paddingRight="5" paddingBottom="5">
+							<mx:DataGrid id="showSalesDG" width="100%" height="100%" focusEnabled="false" horizontalScrollPolicy="off"
+										 verticalScrollPolicy="auto" styleName="CustomDataGrid">
+								<mx:columns>
+									<mx:DataGridColumn dataField="date" headerText="Date" headerStyleName="dataGridHeaderStyle" />
+									<mx:DataGridColumn dataField="cashAmt" headerText="Cash Amount" headerStyleName="dataGridHeaderStyle" sortable="false" />
+									<mx:DataGridColumn dataField="cardAmt" headerText="Card Amount" headerStyleName="dataGridHeaderStyle" sortable="false" />
+									<!--<mx:DataGridColumn dataField="debitAmt" headerText="Debit Amount" headerStyleName="dataGridHeaderStyle" sortable="false" />-->
+									<mx:DataGridColumn dataField="grandTotal" headerText="Total Amount" headerStyleName="dataGridHeaderStyle" sortable="false" />
+								</mx:columns>
+							</mx:DataGrid>
+						</s:HGroup>
+						<s:HGroup width="50%" height="100%" paddingLeft="5" paddingRight="5" paddingBottom="5">
+							<!--<mx:DataGrid id="employerSalesDG" width="100%" height="100%" focusEnabled="false" horizontalScrollPolicy="off"
+							verticalScrollPolicy="auto" styleName="CustomDataGrid">
+								<mx:columns>
+									<mx:DataGridColumn dataField="empId" headerText="Emp Id" headerStyleName="dataGridHeaderStyle" />
+									<mx:DataGridColumn dataField="fullName" headerText="Full Name" headerStyleName="dataGridHeaderStyle" />
+									<mx:DataGridColumn dataField="salesTotal" headerText="Sales Total" headerStyleName="dataGridHeaderStyle" />
+								</mx:columns>
+							</mx:DataGrid>-->
+							<mx:ColumnChart id="salesChart" showDataTips="true" width="100%" height="100%">
+								<!-- horizontal axis -->
+								<mx:horizontalAxis>
+									<mx:CategoryAxis id="category" categoryField="date" title="Sales Chart" />
+								</mx:horizontalAxis>
+								
+								<!-- series -->
+								<mx:series>
+									<mx:ColumnSeries displayName="Open" xField="date" yField="cashAmt" labelPosition="outside" >
+										<mx:fill>
+											<mx:LinearGradient id="linearGradient">
+												<mx:entries>
+													<fx:Array>
+														<mx:GradientEntry color="#C2E0FF" ratio="0.0" alpha="1.0" />
+														<mx:GradientEntry color="haloBlue" ratio="1.0" alpha="1.0" />
+													</fx:Array>
+												</mx:entries>
+											</mx:LinearGradient>
+										</mx:fill>
+									</mx:ColumnSeries>
+								</mx:series>
+							</mx:ColumnChart>
+						</s:HGroup>
+					</s:HGroup>
+				</s:VGroup>
+			</s:NavigatorContent>
+			<s:NavigatorContent width="100%" height="100%">
+				<view:EmployeeReport width="100%" height="100%" id="employeeReport" />
+			</s:NavigatorContent>
+			<s:NavigatorContent width="100%" height="100%">
+				<view:PurchaseReport width="100%" height="100%" id="purchaseReport" />
+			</s:NavigatorContent>
+		</mx:ViewStack>
+	</s:VGroup>
+</s:Group>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" 
+			   height="100%" title="BILLING SYSTEM"
+			   styleName="panelStyle" minWidth="350"
+			   backgroundColor="#f7f8f5"
+			   close="close_clickHandler()">
+	<s:states>
+		<s:State name="ShowOk" />
+		<s:State name="ShowYesNo" />
+		<s:State name="DontShowBtn" />
+	</s:states>
+	<fx:Script>
+		<![CDATA[
+			import com.arun.billingsystem.common.Constant;
+			import com.arun.billingsystem.domain.Purchase;
+			import com.arun.billingsystem.event.RootEvent;
+			
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			[Dispatcher]public var dispatch:IEventDispatcher;
+			private var popUpType:String;
+			private var purchase:Purchase;
+			
+			[Bindable]private var showText:String;
+			private static var showAlert:ShowAlert;
+			
+			[Bindable][Embed(source="./images/Warning.png")]
+			private var warningImg:Class;
+			[Bindable][Embed(source="./images/Success.png")]
+			private var successImg:Class;
+			
+			public static function show(text:String, popUptype:String, showImg:String, purchase:Purchase=null):void {
+				showAlert = new ShowAlert();
+				showAlert.showUp(text, popUptype, showImg, purchase);
+			}
+			
+			public static function remove():void {
+				if(showAlert != null && showAlert.isPopUp){
+					PopUpManager.removePopUp(showAlert);
+				}
+			}
+			
+			public function showUp(text:String, popUptype:String, showImg:String, purchase:Purchase):void {
+				if(text != null && text != "" && popUptype != "" && popUptype != null){
+					this.showText = splitText(text);
+					this.popUpType = popUptype;
+					this.purchase = purchase;
+					if(popUptype == Constant.POP_UP){
+						currentState = 'ShowOk';
+					} else if(popUpType == Constant.POP_UP_PRINT){
+						currentState = 'DontShowBtn';
+					} else { 
+						currentState = 'ShowYesNo';
+					}
+					PopUpManager.addPopUp(this, FlexGlobals.topLevelApplication.document, true);
+					PopUpManager.centerPopUp(this);
+				}
+				
+				if(statusImg != null) {
+					if(showImg == Constant.SHOW_IMG_SUC){
+						statusImg.source = successImg;
+					} else {
+						statusImg.source = warningImg;
+					}
+				}
+			}
+			
+			private static function splitText(text:String):String {
+				if(text.indexOf(":") != -1){
+					return text.substring(text.lastIndexOf(":")+1, text.length);
+				} else {
+					return text;
+				}
+			}
+			
+			protected function okBtn_clickHandler():void {
+				var rootEvent:RootEvent = new RootEvent(RootEvent.EVENT_CONFIRMATION);
+				rootEvent.popUpType = popUpType;
+				rootEvent.purchase = purchase;
+				dispatch.dispatchEvent(rootEvent);
+				PopUpManager.removePopUp(this);
+			}
+			
+			protected function close_clickHandler():void {
+				PopUpManager.removePopUp(this);
+			}
+			
+			protected function vgroup1_creationCompleteHandler():void
+			{
+				if(popUpType == Constant.POP_UP){
+					okBtn.setFocus();
+				} else if(popUpType == Constant.POP_UP_CONF){
+					yesBtn.setFocus();
+				} 
+			}
+			
+			protected function okBtn_keyDownHandler(event:KeyboardEvent):void {
+				if(event.keyCode == Keyboard.ENTER){
+					close_clickHandler();
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:VGroup width="100%" paddingBottom="10" creationComplete="vgroup1_creationCompleteHandler()">
+		<s:HGroup width="100%" minHeight="50" paddingTop="10" paddingLeft="10" paddingRight="10" horizontalAlign="center" verticalAlign="middle">
+			<s:Image id="statusImg"/>
+			<s:Label styleName="FormlabelStyle" text="{showText}" fontSize="13" fontWeight="bold"/>
+		</s:HGroup>
+		<s:HGroup width="100%" horizontalAlign="center" includeIn="ShowOk">
+			<s:Button label="OK" id="okBtn" width="80" height="30" styleName="DefaultGoldButton" click="close_clickHandler()" keyDown="okBtn_keyDownHandler(event)"/>
+		</s:HGroup>
+		<s:HGroup width="100%" horizontalAlign="center" includeIn="ShowYesNo">
+			<s:Button label="Yes" width="80" height="30" id="yesBtn" styleName="DefaultGoldButton" click="okBtn_clickHandler()" />
+			<s:Button label="No" width="80" height="30" id="noBtn" styleName="DefaultButton" click="close_clickHandler()"/>
+		</s:HGroup>
+	</s:VGroup>
+</s:TitleWindow>

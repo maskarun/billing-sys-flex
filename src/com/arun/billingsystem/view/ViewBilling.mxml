@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:view="com.arun.billingsystem.view.*" 
+		 width="100%" height="100%" creationComplete="viewBillingPresentation.viewBilling_creationCompleteHandler()">
+	<fx:Script>
+		<![CDATA[
+			import com.arun.billingsystem.common.Constant;
+			import com.arun.billingsystem.model.presentation.ViewBillingPresentation;
+			import com.arun.billingsystem.util.FormatUtil;
+			
+			import mx.collections.ArrayCollection;
+			
+			[Inject(source="viewBillingPresentation")]
+			public var viewBillingPresentation:ViewBillingPresentation;
+			
+		]]>
+	</fx:Script>
+	
+	<mx:VBox width="100%" height="100%">
+		<s:BorderContainer width="100%"  styleName="panelStyle">
+			<mx:VBox width="100%">
+				<mx:HBox width="100%" height="100%" paddingTop="12">
+					<mx:HBox width="100%" paddingLeft="5" horizontalGap="2">
+						<mx:LinkButton icon="@Embed('./images/icon/viewBilling_32.png')" label="View Bills" useHandCursor="true" buttonMode="true" click="viewBillingPresentation.viewBilling_Click()"/>
+						<mx:VRule height="30" />
+						<mx:LinkButton icon="@Embed('./images/icon/cancelBill_32.png')" label="Clear Bills"  useHandCursor="true" buttonMode="true" click="viewBillingPresentation.clearBilling_Click()"/>
+					</mx:HBox>
+					<mx:HBox height="100%" horizontalAlign="right" verticalAlign="middle" paddingRight="10">
+						<mx:Label text="View Date : " />
+						<mx:DateField id="viewDate" formatString="{FormatUtil.DATE_PICKER_FORMAT}" selectedDate="{new Date()}" 
+									  change="viewBillingPresentation.viewBilling_creationCompleteHandler()"/>
+						<mx:LinkButton icon="@Embed('./images/icon/print_32.png')" id="printSaleBtn" toolTip="Print Sales" styleName="DefaultButton" useHandCursor="true" buttonMode="true"
+								  click="viewBillingPresentation.printSale_clickHandler()"/>
+					</mx:HBox>
+				</mx:HBox>
+				<mx:HRule width="100%"/>
+			</mx:VBox>
+		</s:BorderContainer>
+		
+		<s:VGroup width="100%" height="100%" paddingBottom="5" paddingLeft="5" paddingRight="5">
+			<mx:HBox width="100%" height="80" id="statusVBox" verticalAlign="middle" horizontalAlign="center" styleName="colorBorder" paddingTop="5" paddingBottom="5">
+				<s:VGroup width="30%" height="100%" horizontalAlign="center" verticalAlign="middle">
+					<mx:Label text="Total Transcation : " styleName="FormlabelStyle"/>
+					<mx:Text id="noOfTranscation" styleName="ViewStatusStyle" text="0" />
+				</s:VGroup>
+				<s:VGroup width="30%" height="100%" horizontalAlign="center" verticalAlign="middle">
+					<mx:Label text="Total Quantity : " styleName="FormlabelStyle"/>
+					<mx:Text id="totalQty" styleName="ViewStatusStyle" text="0" />
+				</s:VGroup>
+				<s:VGroup width="30%" height="100%" horizontalAlign="center" verticalAlign="middle">
+					<mx:Label text="Sub Total : " styleName="FormlabelStyle"/>
+					<mx:Text id="subTotal" styleName="ViewStatusStyle" text="0" />
+				</s:VGroup>
+				<s:VGroup width="30%" height="100%" horizontalAlign="center" verticalAlign="middle">
+					<mx:Label text="Total Discount : " styleName="FormlabelStyle"/>
+					<mx:Text id="totalDiscount" styleName="ViewStatusStyle" text="0" />
+				</s:VGroup>
+				<s:VGroup width="30%" height="100%" verticalAlign="middle" horizontalAlign="center">
+					<mx:Label text="Grand Total : " styleName="FormlabelStyle"/>
+					<mx:Text id="grandTotalText" styleName="ViewStatusStyle" text="{FormatUtil.numberFormat(0.00)}" />
+				</s:VGroup>
+			</mx:HBox>
+			<mx:DataGrid width="100%" height="100%" id="todaysDataGrid" focusEnabled="false" rowCount="1" horizontalScrollPolicy="off"
+						 verticalScrollPolicy="auto" styleName="CustomDataGrid" itemClick="viewBillingPresentation.todaysDataGrid_itemClickHandler(event)" >
+				<mx:columns>
+					<mx:DataGridColumn dataField="billNo" headerText="Bill No" textAlign="center" minWidth="100" 
+									   headerStyleName="dataGridHeaderStyle" />
+					<mx:DataGridColumn dataField="date" headerText="Date" textAlign="center" labelFunction="{FormatUtil.myDateFunction}"
+									   headerStyleName="dataGridHeaderStyle" />
+					<mx:DataGridColumn dataField="time" headerText="Time" textAlign="center"
+									   headerStyleName="dataGridHeaderStyle" />
+					<mx:DataGridColumn dataField="billType" headerText="Bill Type" textAlign="center"
+									   headerStyleName="dataGridHeaderStyle" />
+					<mx:DataGridColumn dataField="totalQty" headerText="Total Qty" textAlign="right"
+									   headerStyleName="dataGridHeaderStyle" />
+					<mx:DataGridColumn dataField="discount" headerText="Discount" textAlign="right" labelFunction="{FormatUtil.myLabelFunction}"
+									   headerStyleName="dataGridHeaderStyle" />
+					<mx:DataGridColumn dataField="subTotal" headerText="Sub Total" textAlign="right" labelFunction="{FormatUtil.myLabelFunction}"
+									   headerStyleName="dataGridHeaderStyle" />
+					<mx:DataGridColumn dataField="grandTotal" headerText="Grand Total" textAlign="right" labelFunction="{FormatUtil.myLabelFunction}"
+									   headerStyleName="dataGridHeaderStyle" />
+					<mx:DataGridColumn dataField="status" headerText="Status" textAlign="center" 
+									   headerStyleName="dataGridHeaderStyle" id="statusGridId">
+						<mx:itemRenderer>
+							<fx:Component>
+								<mx:HBox width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" creationComplete="hbox1_creationCompleteHandler(event)">
+									<fx:Script>
+										<![CDATA[
+											import mx.events.FlexEvent;
+											
+											protected function hbox1_creationCompleteHandler(event:FlexEvent):void {
+												if(data.status == 'CANCELLED'){
+													dataStatus.styleName = "CancelStyle";
+												} else if(data.status == 'UPDATED'){
+													dataStatus.styleName = "UpdatedStyle";
+												}
+											}
+										]]>
+									</fx:Script>
+									<s:Label id="dataStatus" text="{data.status}"/>
+								</mx:HBox>
+							</fx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+				</mx:columns>
+			</mx:DataGrid>
+			<!--<mx:HBox width="100%" height="50" id="grandTotalHBox">
+				<s:VGroup height="100%" width="100%" horizontalAlign="right" verticalAlign="middle">
+					<mx:Label text="Grand Total : " styleName="FormlabelStyle"/>
+				</s:VGroup>
+				<s:VGroup width="30%" height="100%" verticalAlign="middle" horizontalAlign="left">
+					<mx:Text id="grandTotalText" styleName="ViewGrandTotalStyle" text="{FormatUtil.numberFormat(0.00)}" />
+				</s:VGroup>
+			</mx:HBox>-->
+		</s:VGroup>
+	</mx:VBox>
+</s:Group>

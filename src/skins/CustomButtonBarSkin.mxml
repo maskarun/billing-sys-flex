@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark" 
+        alpha.disabled="0.5">
+
+    <fx:Metadata>
+    <![CDATA[ 
+       [HostComponent("spark.components.ButtonBar")]
+    ]]>
+    </fx:Metadata> 
+
+    <s:states>
+        <s:State name="normal" />
+        <s:State name="disabled" />
+    </s:states>
+    
+    <fx:Declarations>
+        <fx:Component id="firstButton">
+            <s:ButtonBarButton skinClass="skins.CustomFirstButtonBar" focusAlpha="0" />
+        </fx:Component>
+        <fx:Component id="middleButton" >
+            <s:ButtonBarButton skinClass="skins.CustomMiddleButtonBar" focusAlpha="0" />
+        </fx:Component>
+        <fx:Component id="lastButton" >
+            <s:ButtonBarButton skinClass="skins.CustomMiddleButtonBar" focusAlpha="0" />
+        </fx:Component>
+    </fx:Declarations>
+
+	<s:Rect id="fill" left="0" right="0" top="0" bottom="0" >
+		<s:fill>
+			<s:SolidColor color="0xe1e1e1" />
+		</s:fill>
+	</s:Rect>
+	
+    <s:DataGroup id="dataGroup" width="100%" height="100%">
+        <s:layout>
+            <s:ButtonBarHorizontalLayout gap="-1"/>
+        </s:layout>
+    </s:DataGroup>
+
+</s:Skin>

@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:NavigatorContent xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					xmlns:s="library://ns.adobe.com/flex/spark" 
+					xmlns:mx="library://ns.adobe.com/flex/mx"
+					xmlns:util="com.arun.billingsystem.util.*"
+					xmlns:autocomplete="com.arun.billingsystem.util.autocomplete.*"
+					width="100%" height="100%"
+					creationComplete="navigatorcontent1_creationCompleteHandler()">
+	<fx:Declarations>
+		<s:NumberValidator id="validator" source="{itemCodeTxtInput}" property="text" 
+						   minValue="12" maxValue="12" />
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.arun.billingsystem.common.Constant;
+			import com.arun.billingsystem.common.ErrorConstant;
+			import com.arun.billingsystem.domain.LoadApp;
+			import com.arun.billingsystem.domain.Purchase;
+			import com.arun.billingsystem.domain.PurchaseDetail;
+			import com.arun.billingsystem.domain.Stock;
+			import com.arun.billingsystem.model.UserModel;
+			import com.arun.billingsystem.model.presentation.BillingPresentation;
+			import com.arun.billingsystem.model.presentation.TabBillingPresentation;
+			import com.arun.billingsystem.util.FormatUtil;
+			import com.arun.billingsystem.view.popups.ShowAlert;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.ToolTip;
+			import mx.events.FlexEvent;
+			import mx.managers.ToolTipManager;
+			
+			import spark.events.IndexChangeEvent;
+			
+			public var billingPresentation:BillingPresentation;
+			public var tabBillingPresentation:TabBillingPresentation;
+			public var purchase:Purchase;
+			[Bindable]public var loadApp:LoadApp;
+			private var errorTip:ToolTip;
+			private var myError:String;
+			
+			private function validateEntry(errorTxt:String, event:Object):void {
+				errorTip = ToolTipManager.createToolTip(errorTxt, event.currentTarget.x, event.currentTarget.y) as ToolTip;
+				errorTip.setStyle("styleName", "ErrorStyle");
+			}
+			
+			private function closeErrorTip():void  {
+				if(errorTip != null){
+					errorTip.enabled = false;
+				}
+			}
+				
+			protected function navigatorcontent1_creationCompleteHandler():void
+			{
+				billingPresentation = new BillingPresentation();
+				billingPresentation.billingViewAdded(this);
+				billingPresentation.setBillingData(purchase, loadApp);
+				initTimer();
+			}
+			
+			private var alrtTimer:Timer;
+			
+			protected function initTimer():void {
+				alrtTimer = new Timer(500, 1);
+				alrtTimer.addEventListener(TimerEvent.TIMER_COMPLETE, barcodeEnter);
+			}
+			
+			protected function barcodeEnter(event:TimerEvent):void
+			{
+				var stock:Stock = itemCodeTxtInput.selectedItem as Stock;
+				if(stock != null){
+					var enterTxt:String = stock.itemCode.toString();
+					enterTxt = enterTxt.replace(/[a-zA-Z]/g,'');
+					if(enterTxt.length == 12 && stock.soldPrice > 0){
+//					var stock:Stock = getItemCodeDetial(Number(enterTxt));
+//					if(stock != null){
+//						itemCodeTxtInput.selectedItem = stock;
+						billingPresentation.setStockDetail();
+						billingPresentation.addPurchaseDetail();
+					}
+					itemCodeTxtInput.popUp.displayPopUp = false;
+				}
+				alrtTimer.reset();
+			}
+			
+			protected function itemCodeTxtInput_keyUpHandler(event:KeyboardEvent):void
+			{
+//				if(alrtTimer != null){
+//					alrtTimer.start();
+//				}
+			}
+			
+			public function getItemCodeDetial(itemCode:int):Stock {
+				var stock:Stock = null;
+				var stockList:ArrayCollection = purchase.stockDetailList;
+				if(stockList != null && stockList.length > 0){
+					for(var i:int=0;i<stockList.length;i++){
+						var stk:Stock = stockList.getItemAt(i) as Stock;
+						if(int(stk.itemCode) == itemCode){
+							stock = stk;
+							break;
+						}
+					}
+				}
+				return stock;
+			}
+			
+			public function billingGrid_doubleClickHandler(event:MouseEvent):void
+			{
+				if(event.currentTarget.dataProvider != null){
+					quantityHandler(event.currentTarget.dataProvider);
+				}
+				
+				if(event.currentTarget.selectedItem != null){
+					var purchaseDetail:PurchaseDetail = event.currentTarget.selectedItem as PurchaseDetail;
+					if(purchaseDetail != null){
+						purchaseDetail.quantityEditable = true;
+					}
+				}
+			}
+			
+			public function quantityHandler(dataCollection:ArrayCollection):void
+			{
+				if(dataCollection != null && dataCollection.length > 0){
+					for(var i:int=0; i<dataCollection.length;i++){
+						dataCollection[i].quantityEditable = false;
+					}
+				}
+			}
+						
+		]]>
+	</fx:Script>
+	
+	<s:VGroup width="100%" height="100%">
+		<s:HGroup width="100%" verticalAlign="middle">
+			<s:VGroup width="100%" height="100%" verticalAlign="middle" horizontalAlign="center">
+				<s:HGroup width="100%" height="100%" paddingLeft="10" gap="10">
+					<s:HGroup width="100%" height="100%" verticalAlign="middle">
+						<mx:Label text=" Item Code :" styleName="FormlabelStyle"/>
+						<autocomplete:AutoComplete id="itemCodeTxtInput" labelField="itemCode,soldPrice" forceOpen="false" styleName="TextInputStyle" 
+												   defaultCode="{loadApp.showItemCodeNo}" defaultLabelField="itemCode"
+												   skinClass="skins.AutoCompleteSkin" width="100%" tabIndex="0" requireSelection="true" 
+												   keyDown="billingPresentation.itemCodeTxtInput_keyDownHandler(event)"
+												   keyUp="itemCodeTxtInput_keyUpHandler(event)"/>
+					</s:HGroup>
+					
+					<s:HGroup height="100%" verticalAlign="middle">
+						<mx:Label text="Pics :" styleName="FormlabelStyle"/>
+						<s:TextInput id="quantityTxtInput" tabIndex="1" text="0" restrict="-[0-9]." width="100" styleName="TextInputStyle" 
+									 enter="billingPresentation.addPurchaseDetail()"/>
+					</s:HGroup>
+				</s:HGroup>
+				<!--<s:HGroup width="100%" height="27" verticalAlign="middle" horizontalAlign="center">
+					<mx:ToolTip id="errorText" styleName="ErrorStyle" visible="false" />
+				</s:HGroup>-->
+				
+			</s:VGroup>
+			
+			<s:HGroup width="20%" height="100%" verticalAlign="middle" horizontalAlign="center">
+				<mx:Label text="Total Pics : " styleName="FormlabelStyle"/>
+				<mx:Text id="totalQuantityTxt" styleName="PicStyle" text="0" paddingLeft="3"/>
+			</s:HGroup>
+			
+		</s:HGroup>
+				
+		<s:HGroup width="100%" height="100%">
+			<mx:DataGrid id="billingGrid" rowHeight="25" width="100%" height="100%" horizontalScrollPolicy="off" focusEnabled="false" styleName="CustomDataGrid" verticalScrollPolicy="auto"
+						 doubleClickEnabled="true" doubleClick="billingGrid_doubleClickHandler(event)">
+				<mx:columns>
+					<!--<mx:DataGridColumn dataField="sno" headerText="S.NO" minWidth="50" width="50" headerStyleName="dataGridHeaderStyle" textAlign="center"/>-->
+					
+					<mx:DataGridColumn dataField="itemCode" headerText="Item Code" minWidth="100" headerStyleName="dataGridHeaderStyle" textAlign="center"/>
+					
+					<mx:DataGridColumn dataField="category" headerText="Category" minWidth="150" headerStyleName="dataGridHeaderStyle"/>
+					
+					<mx:DataGridColumn dataField="itemName" headerText="Item Name" minWidth="250" headerStyleName="dataGridHeaderStyle"/>
+					
+					<mx:DataGridColumn dataField="soldPrice" headerText="Rate" minWidth="100" textAlign="right" headerStyleName="dataGridHeaderStyle"
+									   labelFunction="{FormatUtil.myLabelFunction}"/>
+					
+					<mx:DataGridColumn dataField="quantity" headerText="Pics" minWidth="100" textAlign="center" headerStyleName="dataGridHeaderStyle" editable="true" 
+									   id="quantityGridId">
+						<mx:itemRenderer>
+							<fx:Component>
+								<mx:HBox width="100%" height="100%" click="quantityId_clickHandler(event)">
+									<fx:Script>
+										<![CDATA[
+											import mx.collections.ArrayCollection;
+											import mx.events.NumericStepperEvent;
+											
+											protected function quantityId_changeHandler():void {
+												if(data != null){
+													data.quantity = quantityId.value;
+													data.totalAmount = data.soldPrice * quantityId.value;
+													outerDocument.billingPresentation.updateTotal();
+													quantityId.setFocus();
+												}
+											}
+											
+											protected function quantityId_keyDownHandler(event:KeyboardEvent):void
+											{
+												if(event.keyCode == Keyboard.ENTER || event.keyCode == Keyboard.ESCAPE){
+													data.quantityEditable = false;
+												}
+											}
+											
+											protected function quantityId_focusOutHandler(event:FocusEvent):void {
+												data.quantityEditable = false;
+											}
+											
+											protected function quantityId_clickHandler(event:MouseEvent):void {
+												if(data !=null){
+													var arr:ArrayCollection = event.currentTarget.automationOwner.dataProvider as ArrayCollection;
+													outerDocument.quantityHandler(arr);
+													data.quantityEditable = true;
+													quantityId.setFocus();
+												}
+											}
+											
+											
+										]]>
+									</fx:Script>
+									<mx:NumericStepper width="100%" minimum="1" stepSize="0.1"  maximum="1000" value="{data.quantity}" id="quantityId" focusOut="quantityId_focusOutHandler(event)"
+													   change="quantityId_changeHandler()" visible="{data.quantityEditable}" keyDown="quantityId_keyDownHandler(event)" />
+									<mx:Label width="100%" visible="{!data.quantityEditable}" text="{data.quantity}" />
+								</mx:HBox>
+							</fx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					
+					<mx:DataGridColumn dataField="totalAmount" headerText="Total Amount" minWidth="140" textAlign="right" headerStyleName="dataGridHeaderStyle"
+									   labelFunction="{FormatUtil.myLabelFunction}"/>
+					
+					<mx:DataGridColumn editable="false" minWidth="30" width="35">
+						<mx:itemRenderer>
+							<fx:Component>
+								<mx:HBox width="100%" height="15" horizontalAlign="center" verticalAlign="middle">
+									<mx:Button icon="@Embed(source='/images/delete.png')" useHandCursor="true" buttonMode="true"
+											   click="outerDocument.billingPresentation.deletePurchaseDetail()" toolTip="Delete" width="15" height="15"/>
+								</mx:HBox>
+							</fx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+				</mx:columns>
+			</mx:DataGrid>
+		</s:HGroup>
+		<mx:Canvas width="100%" height="15">
+			<s:VGroup height="100%" visible="false">
+				<mx:Label text="Item Name :" styleName="FormlabelStyle"/>
+			</s:VGroup>
+			<s:VGroup height="100%" visible="false">
+				<s:ComboBox id="itemNameCmbBox" width="160" styleName="ComboBoxStyle" selectedIndex="0" tabIndex="7"
+							focusOut="billingPresentation.itemNameCmbBox_focusOutHandler()" enabled="false"/>
+			</s:VGroup>
+			
+			<s:VGroup height="100%" visible="false">
+				<mx:Label text="Category :" styleName="FormlabelStyle"/>
+			</s:VGroup>
+			<s:VGroup height="100%" horizontalAlign="left" visible="false">
+				<s:ComboBox id="categoryCmbBox" width="160" styleName="ComboBoxStyle" selectedIndex="0" tabIndex="8"
+							focusOut="billingPresentation.categoryCmbBox_focusOutHandler()" enabled="false" />
+			</s:VGroup>
+			<s:HGroup height="100%" verticalAlign="middle" visible="false">
+				<mx:Label text="Rate :" styleName="FormlabelStyle"/>
+				<s:TextInput id="rateTxtInput" tabIndex="1" restrict="[0-9]." text="0" width="160" styleName="TextInputStyle"
+							 enter="billingPresentation.enter_keyDownHandler()"/>
+			</s:HGroup>
+			
+			<s:HGroup height="100%" width="100%" verticalAlign="middle" horizontalAlign="right" paddingRight="15">
+				<mx:Label text="Return Pics : " styleName="FormlabelStyle"/>
+				<mx:Text id="totalReturnQtyTxt" text="0"/>
+			</s:HGroup>
+			
+		</mx:Canvas>
+		
+		<mx:HRule width="100%" />
+		
+		<s:HGroup width="100%" height="20%" verticalAlign="bottom">
+			<s:HGroup width="30%" paddingTop="5" paddingBottom="5">
+				<s:HGroup width="100%" height="100%">
+					<s:VGroup height="100%" horizontalAlign="right" paddingLeft="50">
+						<mx:Label text="Sub Total : " styleName="FormlabelStyle"/>
+						<mx:Label text="Discount : " styleName="FormlabelStyle"/>
+						<mx:Label text="Grand Total : " styleName="FormlabelStyle"/>
+					</s:VGroup>
+					<s:VGroup>
+						<s:TextInput id="subTotalTxtInput" text="0.00" restrict="[0-9]." enabled="false" styleName="TextInputStyle"/>
+						<s:TextInput id="discountTxtInput" tabIndex="3" text="0" restrict="[0-9]" styleName="TextInputStyle" 
+									 focusOut="billingPresentation.discountTxtInput_focusOutHandler()" 
+									 keyUp="billingPresentation.discountTxtInput_focusOutHandler()" 
+									 enter="billingPresentation.doneBtn_buttonHandler()"/>
+						<s:TextInput id="grandTotalTxtInput" enabled="false" text="0.00" restrict="[0-9]." styleName="TextInputStyle" editable="false"
+									 keyDown="billingPresentation.grandTotalTxtInput_keyDownHandler(event)"
+									 enter="billingPresentation.doneBtn_buttonHandler()"/>
+					</s:VGroup>
+				</s:HGroup>
+				
+				<!--<s:HGroup height="100%" verticalAlign="middle" paddingLeft="20">
+					<s:Button id="doneBtn" label="Save" width="100" height="40" tabIndex="5" styleName="DefaultButton" useHandCursor="true" buttonMode="true"
+						keyDown="billingPresentation.grandTotalTxtInput_keyDownHandler(event)"
+						click="billingPresentation.doneBtn_buttonHandler()"/>
+				</s:HGroup>-->
+			</s:HGroup>
+			
+			<s:HGroup width="70%" horizontalAlign="right" paddingTop="5" paddingBottom="5">
+				<mx:Text id="grandTotalTxt" width="100%" styleName="GrandTotalStyle" text="{FormatUtil.numberFormat(0.00)}"/>
+			</s:HGroup>
+		</s:HGroup>
+		
+	</s:VGroup>
+</s:NavigatorContent>

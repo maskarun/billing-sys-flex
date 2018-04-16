@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark" 
+        alpha.disabled="0.5">
+
+    <fx:Metadata>
+    <![CDATA[ 
+        [HostComponent("spark.components.ToggleButton")]
+    ]]>
+    </fx:Metadata> 
+	<!-- states -->
+	<s:states>
+		<s:State name="up" />
+		<s:State name="over" stateGroups="overStates" />
+		<s:State name="down" stateGroups="downStates" />
+		<s:State name="disabled" stateGroups="disabledStates" />
+		<s:State name="upAndSelected" stateGroups="selectedStates, selectedUpStates" />
+		<s:State name="overAndSelected" stateGroups="overStates, selectedStates" />
+		<s:State name="downAndSelected" stateGroups="downStates, selectedStates" />
+		<s:State name="disabledAndSelected" stateGroups="selectedUpStates, disabledStates, selectedStates" />
+	</s:states>
+
+	<s:Rect left="8" right="6" top="5" bottom="0" >
+		<s:fill>
+			<s:SolidColor color="0xe1e1e1" />
+		</s:fill>
+	</s:Rect>
+	
+	<s:Label id="labelDisplay" textAlign="center" fontSize="18" color="0x4b4b4b"
+			 verticalAlign="middle" color.selectedStates="0xFFA100" fontWeight="bold"
+			 maxDisplayedLines="1" horizontalCenter="0" verticalCenter="1"
+			 left="10" right="10">
+	</s:Label>
+	
+</s:Skin>

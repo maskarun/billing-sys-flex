@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="100%" height="100%" xmlns:view="com.arun.billingsystem.view.*"
+		 creationComplete="tabBilling_creationCompleteHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.arun.billingsystem.common.Constant;
+			import com.arun.billingsystem.model.presentation.BillingPresentation;
+			import com.arun.billingsystem.model.presentation.TabBillingPresentation;
+			
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			[Inject(source="tabBillingPresentation")]
+			public var tabBillingPresentation:TabBillingPresentation;
+			
+			[Bindable][Embed(source="images/Save.png")]
+			private var saveIcon:Class;
+			
+			protected function tabBilling_creationCompleteHandler(event:FlexEvent):void
+			{
+				tabBillingPresentation.addTabBilling();
+			}
+			
+		]]>
+	</fx:Script>
+	<mx:VBox width="100%" height="100%">
+		<s:BorderContainer width="100%" styleName="panelStyle">
+			<s:HGroup width="100%" paddingTop="12">
+				<s:HGroup width="100%" paddingLeft="5" paddingRight="5">
+					<mx:LinkButton icon="@Embed('./images/icon/newTab_32.png')" id="newBill" tabIndex="-1" label="New [F1]" height="30" useHandCursor="true" buttonMode="true" 
+							  click="tabBillingPresentation.newBill_clickHandler()"/>
+					<mx:VRule height="30" />
+					<mx:LinkButton icon="@Embed('./images/icon/clearBill_32.png')" id="clearBill" tabIndex="-1" label="Clear [F2]" height="30" useHandCursor="true" buttonMode="true"
+							  click="tabBillingPresentation.clear_clickHandler()"/>
+					<mx:VRule height="30" />
+					<mx:LinkButton icon="@Embed('./images/icon/delete_24.png')" id="closeTabBtn" tabIndex="-1" label="Delete [F3]" height="30" buttonMode="true" useHandCursor="true"
+							  click="tabBillingPresentation.shortcut_removeTabBilling()"/>
+					<mx:VRule height="30" />
+					<mx:LinkButton icon="@Embed('./images/icon/save_32.png')" id="saveTabBtn" tabIndex="-1" label="Save [F4]" height="30" buttonMode="true" useHandCursor="true"
+							 click="tabBillingPresentation.saveBill_clickHandler(Constant.BILL_STATUS_CLOSED)"/>
+				</s:HGroup>
+				<!--<s:HGroup height="100%" horizontalAlign="right" gap="20" paddingRight="30" verticalAlign="middle">
+					<s:RadioButton id="cash" label="Cash" group="{billTypeRBGroup}" value="CASH" selected="true" />
+					<s:RadioButton id="debit" label="Debit" group="{billTypeRBGroup}" value="DEBIT" />
+					<s:RadioButton id="card" label="Card" group="{billTypeRBGroup}" value="CARD" />
+				</s:HGroup>-->
+			</s:HGroup>
+		</s:BorderContainer>
+	
+		<mx:HRule width="100%" top="0" bottom="0"/>
+		
+		<mx:VBox width="100%" height="100%">
+			<!--<s:HGroup width="100%" paddingLeft="20" paddingRight="20" horizontalAlign="left" includeIn="ShowName">
+				<s:VGroup height="100%" horizontalAlign="right">
+					<mx:Label text="Name :" styleName="FormlabelStyle"/>
+				</s:VGroup>
+				<s:VGroup width="60%" height="100%" horizontalAlign="left">
+					<s:TextInput id="billerNameTxtInput" width="100%" styleName="TextInputStyle"/>
+				</s:VGroup>
+				
+				<s:VGroup height="100%" horizontalAlign="right">
+					<mx:Label text="Phone :" styleName="FormlabelStyle"/>
+				</s:VGroup>
+				<s:VGroup height="100%" horizontalAlign="left">
+					<s:TextInput id="phoneTxtInput" width="150" styleName="TextInputStyle" restrict="0-9" maxChars="10"/>
+				</s:VGroup>
+			</s:HGroup>-->
+			
+			<!--backgroundColor="#f7f8f5" -->
+			<s:VGroup width="100%" height="100%" paddingLeft="5" paddingRight="5" paddingBottom="5">
+				<mx:TabNavigator id="tabNavigator" width="100%" height="100%" focusEnabled="false" backgroundColor="#f7f8f5" 
+									 change="tabBillingPresentation.tabNavigator_changeHandler()"
+									 tabStyleName="myTabs" firstTabStyleName="myTabs" lastTabStyleName="myTabs" selectedTabTextStyleName="myTextTabs" />
+				
+			</s:VGroup>
+		</mx:VBox>
+	</mx:VBox>
+</s:Group>

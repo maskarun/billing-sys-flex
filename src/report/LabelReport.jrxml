@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="LabelReport" language="groovy" pageWidth="285" pageHeight="75" columnWidth="278" leftMargin="2" rightMargin="5" topMargin="5" bottomMargin="5" uuid="9ffad44f-b138-40da-af96-1fa1860fb95f">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<field name="class" class="java.lang.Class">
+		<fieldDescription><![CDATA[class]]></fieldDescription>
+	</field>
+	<field name="itemCode" class="java.lang.String">
+		<fieldDescription><![CDATA[itemCode]]></fieldDescription>
+	</field>
+	<field name="itemName" class="java.lang.String">
+		<fieldDescription><![CDATA[itemName]]></fieldDescription>
+	</field>
+	<field name="noOfPrint" class="java.lang.String">
+		<fieldDescription><![CDATA[noOfPrint]]></fieldDescription>
+	</field>
+	<field name="size" class="java.lang.String">
+		<fieldDescription><![CDATA[size]]></fieldDescription>
+	</field>
+	<field name="soldPrice" class="java.lang.String">
+		<fieldDescription><![CDATA[soldPrice]]></fieldDescription>
+	</field>
+	<summary>
+		<band height="65" splitType="Prevent">
+			<staticText>
+				<reportElement uuid="edd97c32-6edb-477d-9063-3921b5a16d9a" x="87" y="12" width="28" height="16"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Elephant" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Size : ]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="c24a3fe5-a4f3-4d3c-8449-ac9022a224d8" x="37" y="12" width="50" height="16"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Elephant" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{soldPrice}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="4754da85-1384-4cbd-a75d-31895f53d61c" x="5" y="0" width="128" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Elephant" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+					<paragraph lineSpacing="1_1_2" tabStopWidth="40"/>
+				</textElement>
+				<text><![CDATA[MUMMY DADDY READYMADES]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="f5f93f0f-25f3-43cf-8478-32aac131815c" x="114" y="12" width="19" height="16"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Elephant" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{size}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="6c9088e5-e362-4c79-bc4e-f35d8713f3ed" x="5" y="12" width="32" height="16"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Elephant" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[MRP : ]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="c10913f0-8d39-49a5-8902-5ae9f4b1e540" x="5" y="49" width="128" height="12"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="Arial Black" size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{itemName}]]></textFieldExpression>
+			</textField>
+			<componentElement>
+				<reportElement uuid="d6d3c286-9c14-4664-b942-406544ae3342" positionType="FixRelativeToBottom" x="5" y="28" width="128" height="21"/>
+				<jr:barbecue xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" type="Code128" drawText="true" checksumRequired="false">
+					<jr:codeExpression><![CDATA[$F{itemCode}]]></jr:codeExpression>
+				</jr:barbecue>
+			</componentElement>
+			<textField>
+				<reportElement uuid="cb66131e-9782-4044-b134-ec7a56d70e7f" x="254" y="12" width="19" height="16"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Elephant" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{size}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="62dcee69-fa19-41dc-b4ca-dae80639bb1c" x="177" y="12" width="50" height="16"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Elephant" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{soldPrice}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="5eec4a8e-4d8a-4732-a281-1bd6f56a221f" x="145" y="12" width="32" height="16"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Elephant" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[MRP : ]]></text>
+			</staticText>
+			<componentElement>
+				<reportElement uuid="828bacf9-aa30-4999-bde3-790e1270b510" positionType="Float" x="145" y="28" width="128" height="21"/>
+				<jr:barbecue xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" type="Code128" drawText="true" checksumRequired="false">
+					<jr:codeExpression><![CDATA[$F{itemCode}]]></jr:codeExpression>
+				</jr:barbecue>
+			</componentElement>
+			<staticText>
+				<reportElement uuid="af240772-c159-4965-9178-c3b7b06523b0" x="227" y="12" width="28" height="16"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Elephant" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Size : ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="43b4d017-9f6f-4d61-a9c4-75f9e56ce00b" x="145" y="0" width="128" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Elephant" size="7" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+					<paragraph lineSpacing="1_1_2" tabStopWidth="40"/>
+				</textElement>
+				<text><![CDATA[MUMMY DADDY READYMADES]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="771bc02c-4648-48f0-a5e1-4ea6ecf9b3b0" x="145" y="49" width="128" height="12"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="Arial Black" size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{itemName}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<swiz:BeanProvider xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx" 
+				   xmlns:swiz="http://swiz.swizframework.org" 
+				   xmlns:controller="com.arun.billingsystem.controller.*" 
+				   xmlns:service="com.arun.billingsystem.service.*" 
+				   xmlns:presentation="com.arun.billingsystem.model.presentation.*" 
+				   xmlns:model="com.arun.billingsystem.model.*">
+	
+	<controller:LoginController id="loginController" />
+	<controller:ShortCutController id="shortCutController" />
+	
+	<presentation:HomePresentation id="homePresentation" />
+	<model:UserModel id="userModel" />
+	
+	<model:StockModel id="stockModel" />
+	<presentation:StockPresentation id="stockPresentation" />
+	<service:StockServiceHelper id="stockServiceHelper" />
+	
+	<model:ReportModel id="reportModel" />
+	<presentation:ReportPresentation id="reportPresentation" />
+	<service:ReportServiceHelper id="reportServiceHelper" />
+	
+	<model:TabBillingModel id="tabBillingModel" />
+	<presentation:TabBillingPresentation id="tabBillingPresentation" />
+	<service:TabBillingServiceHelper id="tabBillingServiceHelper" />
+
+	<presentation:ViewBillingPresentation id="viewBillingPresentation" />
+	<model:ViewBillingModel id="viewBillingModel"/>
+							
+</swiz:BeanProvider> 

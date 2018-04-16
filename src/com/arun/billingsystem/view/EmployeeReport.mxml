@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%"
+		 creationComplete="showEmployeeReport()">
+	<fx:Script>
+		<![CDATA[
+			import com.arun.billingsystem.common.Constant;
+			import com.arun.billingsystem.domain.Search;
+			import com.arun.billingsystem.model.ReportModel;
+			import com.arun.billingsystem.model.presentation.ReportPresentation;
+			import com.arun.billingsystem.util.FormatUtil;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.CalendarLayoutChangeEvent;
+			import mx.events.FlexEvent;
+			
+			[Inject(source="reportModel")]
+			public var reportModel:ReportModel;
+			
+			public function showEmployeeReport():void {
+				var search:Search = reportModel.search;
+				if(search != null) {
+					var soldList:ArrayCollection = new ArrayCollection();
+					var soldItemList:ArrayCollection = search.soldItemList
+					if(soldItemList != null){
+						for(var i:int = 0; i<soldItemList.length;i++){
+							var valueArray:Array = soldItemList.getItemAt(i).toString().split("-");
+							if(valueArray != null){
+								soldList.addItem({"itemCode": valueArray[0], "itemName": valueArray[1], "totalQty" :valueArray[2]});
+							}
+						}
+					}
+					soldListDG.dataProvider = soldList;
+					columnChart.dataProvider = soldList;
+					employerSalesDG.dataProvider = search.employerSalesList;
+					employerPieChart.dataProvider = search.employerSalesList;
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<mx:VBox width="100%" height="100%">
+		
+		<s:HGroup width="100%" height="50%" paddingLeft="5" paddingRight="5" paddingBottom="5">
+			<mx:DataGrid id="employerSalesDG" width="100%" height="100%" focusEnabled="false" horizontalScrollPolicy="off"
+							verticalScrollPolicy="auto" styleName="CustomDataGrid">
+				<mx:columns>
+				<mx:DataGridColumn dataField="empId" headerText="Emp Id" headerStyleName="dataGridHeaderStyle" />
+				<mx:DataGridColumn dataField="fullName" headerText="Full Name" headerStyleName="dataGridHeaderStyle" />
+				<mx:DataGridColumn dataField="salesTotal" headerText="Sales Total" headerStyleName="dataGridHeaderStyle" />
+				</mx:columns>
+			</mx:DataGrid>
+			<mx:PieChart id="employerPieChart" width="100%" height="100%">
+				<mx:series>
+					<!--<mx:PieSeries displayName="FullName" field="empId"/>-->
+					<mx:PieSeries field="salesTotal" nameField="fullName" />
+				</mx:series>
+			</mx:PieChart>
+		</s:HGroup>
+		
+		<s:HGroup width="100%" height="50%" paddingLeft="5" paddingRight="5" paddingBottom="5">
+			<mx:ColumnChart id="columnChart" showDataTips="true" width="100%" height="100%">
+				<!-- horizontal axis -->
+				<mx:horizontalAxis>
+					<mx:CategoryAxis id="ca" categoryField="itemName" title="Sales Chart" />
+				</mx:horizontalAxis>
+				
+				<!-- series -->
+				<mx:series>
+					<mx:ColumnSeries displayName="Open" xField="itemName" yField="totalQty" labelPosition="outside" >
+						<mx:fill>
+							<mx:LinearGradient id="linearGradient">
+								<mx:entries>
+									<fx:Array>
+										<mx:GradientEntry color="#C2E0FF" ratio="0.0" alpha="1.0" />
+										<mx:GradientEntry color="haloBlue" ratio="1.0" alpha="1.0" />
+									</fx:Array>
+								</mx:entries>
+							</mx:LinearGradient>
+						</mx:fill>
+					</mx:ColumnSeries>
+				</mx:series>
+			</mx:ColumnChart>
+			<mx:DataGrid id="soldListDG" width="100%" height="100%" focusEnabled="false" horizontalScrollPolicy="off"
+						 verticalScrollPolicy="auto" styleName="CustomDataGrid">
+				<mx:columns>
+					<mx:DataGridColumn dataField="itemCode" headerText="Item Code" headerStyleName="dataGridHeaderStyle" />
+					<mx:DataGridColumn dataField="itemName" headerText="Item Name" headerStyleName="dataGridHeaderStyle" />
+					<mx:DataGridColumn dataField="totalQty" headerText="Sold Qty" headerStyleName="dataGridHeaderStyle" />
+				</mx:columns>
+			</mx:DataGrid>
+		</s:HGroup>
+		
+	</mx:VBox>
+</s:Group>

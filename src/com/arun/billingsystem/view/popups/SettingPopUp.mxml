@@ -1,0 +1,581 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="100%" height="100%" minWidth="800"
+			   backgroundColor="#f7f8f5" minHeight="380"
+			   close="cancelBtn_clickHandler()"
+			   styleName="panelStyle" title="Setting">
+	<fx:Declarations>
+		
+		<fx:Array id="arr">
+			<fx:Object label="Application" icon="@Embed('/images/icon/settings_32.png')" />
+			<fx:Object label="Category" icon="@Embed('/images/icon/print_32.png')" />
+			<fx:Object label="Printer" icon="@Embed('/images/icon/print_32.png')" />
+			<fx:Object label="User" icon="@Embed('/images/icon/user_32.png')" />
+			<fx:Object label="Sale Person" icon="@Embed('/images/icon/gst_32.png')" />
+		</fx:Array>
+	</fx:Declarations>
+	<s:states>
+		<mx:State name="Admin" />
+		<mx:State name="SystemAdmin" />
+	</s:states>
+	<fx:Script>
+		<![CDATA[
+			import com.arun.billingsystem.common.Constant;
+			import com.arun.billingsystem.common.ErrorConstant;
+			import com.arun.billingsystem.domain.Employer;
+			import com.arun.billingsystem.domain.LoadApp;
+			import com.arun.billingsystem.domain.Printer;
+			import com.arun.billingsystem.domain.Purchase;
+			import com.arun.billingsystem.domain.User;
+			import com.arun.billingsystem.event.RootEvent;
+			import com.arun.billingsystem.model.UserModel;
+			import com.arun.billingsystem.util.FormatUtil;
+			
+			import mx.collections.ArrayCollection;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			import mx.events.ItemClickEvent;
+			import mx.managers.PopUpManager;
+			
+			import spark.components.RadioButton;
+			
+			[Dispatcher]public var dispatch:IEventDispatcher;
+			
+			private static var settingPopup:SettingPopUp;
+			private var loadApp:LoadApp;
+			private var isPrintLoad:Boolean = false;
+			private var isConfigLoad:Boolean = false;
+			private var isUserLoad:Boolean = false;
+			private var isSalePersonLoad:Boolean = false;
+			[Bindable]private var userTypeArr:ArrayCollection = new ArrayCollection(['User','Admin']);
+			
+			[Bindable]private var userListBind:ArrayCollection;
+			[Bindable]private var employerListBind:ArrayCollection;
+			
+			public static function show(loadApp:LoadApp):void {
+				settingPopup = new SettingPopUp();
+				settingPopup.showUp(loadApp);
+			}
+			
+			public static function remove():void {
+				if(settingPopup != null && settingPopup.isPopUp){
+					PopUpManager.removePopUp(settingPopup);
+				}
+			}
+			
+			protected function cancelBtn_clickHandler():void {
+				PopUpManager.removePopUp(this);
+			}
+			
+			public function showUp(loadApp:LoadApp):void {
+				if(loadApp != null){
+					this.loadApp = loadApp;
+					if(this.loadApp.userType == null || this.loadApp.userType.toLowerCase() == 'systemadmin'){
+						this.currentState = 'SystemAdmin';
+					} else {
+						this.currentState = 'Admin';
+					}
+					PopUpManager.addPopUp(this, FlexGlobals.topLevelApplication.document, true);
+					PopUpManager.centerPopUp(this);
+				}
+			}
+						
+			protected function tabBar_itemClick(evt:ItemClickEvent):void {
+				viewStack.selectedIndex = evt.index;
+			}
+						
+			protected function application_VBox():void {
+				if(this.currentState == 'SystemAdmin'){
+					machineName.selected = loadApp.showMachineName;
+					machineNameTxtInput.text = loadApp.machineName;
+//					itemCode.selected = loadApp.showItemCode;
+					itemCodeNoTxtInput.text = loadApp.showItemCodeNo;
+				}
+				amtReceived.selected = loadApp.showAmountReceived;
+				showCustomer.selected = loadApp.showCustomer;
+				showEmployee.selected = loadApp.showEmployee;
+				showSize.selected = loadApp.showSize;
+				showGST.selected = loadApp.showGST;//printer.printGST;
+				if(loadApp.printer != null){
+					gstRatesTxtInput.text = String(loadApp.printer.gstRateSlab);
+					gstTinTxtInput.text = loadApp.printer.gstTin;
+					includeGSTAmt.selected = loadApp.printer.includeGSTAmt;
+				}
+			}
+			
+			protected function config_VBox():void {
+				isConfigLoad = true;
+				categoryListId.dataProvider = loadApp.categorys;
+				sizeListId.enabled = (showSize.selected || loadApp.showSize) ? true : false;
+				sizeListId.dataProvider = loadApp.sizeList;
+				sizeTxtInput.enabled = loadApp.showSize;
+			}
+			
+			protected function printer_VBox():void {
+				isPrintLoad = true;
+				var printerNames:Vector.<String> = PrintJob.printers;
+				var deviceName:ArrayCollection = new ArrayCollection();
+				if(printerNames){
+					for(var i:int=0; i<printerNames.length;i++){
+						deviceName.addItem(printerNames[i]);
+					}
+				}
+				namesTxtInput.text = loadApp.name;
+				printerNameCmb.dataProvider = deviceName;
+				labelPrinterNameCmb.dataProvider = deviceName;
+				if(loadApp.printer != null){
+					if(deviceName.getItemIndex(loadApp.printer.printerName) != -1){
+						printerNameCmb.selectedIndex = deviceName.getItemIndex(loadApp.printer.printerName);
+					}
+					if(deviceName.getItemIndex(loadApp.printer.labelPrinterName) != -1){
+						labelPrinterNameCmb.selectedIndex = deviceName.getItemIndex(loadApp.printer.labelPrinterName);
+					}
+					printAddress1.text = loadApp.printer.address1;
+					printAddress2.text = loadApp.printer.address2;
+					printPhone.text = loadApp.printer.phone;
+//					showGST.selected = loadApp.printer.printGST;
+				}
+			}
+			
+			protected function user_VBox():void {
+				isUserLoad = true;
+//				userDataGrid.dataProvider = loadApp.userList;
+				fullNameTxtInput.text = "";
+				userTypeCmb.selectedIndex = 0;
+				userNameTxtInput.text = "";
+				passwordTxtInput.text = "";
+				userListBind = loadApp.userList;
+				userDataGrid.dataProvider = userListBind;
+			}
+			
+			protected function salesPerson_VBox():void {
+				isSalePersonLoad = true;
+				salesPersonDataGrid.dataProvider = loadApp.employerList;
+				empIdTxtInput.text = "";
+				nameTxtInput.text = "";
+				joiningDate.selectedIndex = -1;
+				salaryTxtInput.text = "";
+				phoneNoTxtInput.text = "";
+				employerListBind = loadApp.employerList;
+				salesPersonDataGrid.dataProvider = employerListBind;
+			}
+			
+			protected function resetBtn_clickHandler():void {
+				application_VBox();
+				config_VBox();
+				printer_VBox();
+				user_VBox();
+				salesPerson_VBox();
+			}
+			
+			protected function updateBtn_clickHandler():void {
+				loadApp.showAmountReceived = amtReceived.selected; 
+				loadApp.showCustomer = showCustomer.selected;
+				loadApp.showEmployee = showEmployee.selected;
+				loadApp.showSize = showSize.selected;
+				loadApp.showGST = showGST.selected;
+				if(this.currentState == 'SystemAdmin'){
+					loadApp.showMachineName = machineName.selected;
+					loadApp.machineName = machineNameTxtInput.text;
+//					loadApp.showItemCode = itemCode.selected;
+					loadApp.showItemCodeNo = itemCodeNoTxtInput.text;
+				}
+				if(namesTxtInput != null){
+					loadApp.name = namesTxtInput.text;
+				}
+				if(loadApp.printer == null){
+					var printer:Printer = new Printer();
+					loadApp.printer = setPrinter(printer);
+					loadApp.printer.printGST = showGST.selected;
+					loadApp.printer.includeGSTAmt = includeGSTAmt.selected;
+				} else {
+					loadApp.printer = setPrinter(loadApp.printer);
+					loadApp.printer.printGST = showGST.selected;
+				}
+				if(isConfigLoad){
+					loadApp.sizeList = ArrayCollection(sizeListId.dataProvider);
+					loadApp.categorys = ArrayCollection(categoryListId.dataProvider);
+				}
+				if(isUserLoad){
+					loadApp.userList = userDataGrid.dataProvider as ArrayCollection;
+				}
+				if(isSalePersonLoad){
+					loadApp.employerList = salesPersonDataGrid.dataProvider as ArrayCollection;
+				}
+				var rootEvent:RootEvent = new RootEvent(RootEvent.EVENT_SETTING);
+				rootEvent.loadApp = loadApp;
+				dispatch.dispatchEvent(rootEvent);
+			}
+			
+			private function setPrinter(printer:Printer):Printer {
+				if(isPrintLoad){
+					printer.name = namesTxtInput.text;
+					printer.printerName = printerNameCmb.selectedItem;
+					printer.labelPrinterName = labelPrinterNameCmb.selectedItem;
+					printer.address1 = printAddress1.text;
+					printer.address2 = printAddress2.text;
+					printer.phone = printPhone.text;
+					printer.gstRateSlab = Number(gstRatesTxtInput.text);
+					printer.gstTin = gstTinTxtInput.text;
+					printer.includeGSTAmt = includeGSTAmt.selected;	
+				}
+				return printer;
+			}
+			
+			protected function addUserBtn_clickHandler():void {
+				var isError:Boolean = true;
+				if(fullNameTxtInput.text == "" || fullNameTxtInput.text == null){
+					isError = false;
+					return;
+				}
+				if(userNameTxtInput.text == "" || userNameTxtInput.text == null){
+					isError = false;
+					return;
+				}
+				if(passwordTxtInput.text == "" || passwordTxtInput.text == null){
+					isError = false;
+					return;
+				}
+				var userArr:ArrayCollection = loadApp.userList;
+				for(var i:int=0;i<userArr.length;i++){
+					var userS:User = userArr.getItemAt(i) as User;
+					if(userS.username == userNameTxtInput.text){
+						isError = false;
+					}
+				}
+				if(isError){
+					var user:User = new User();
+					user.fullName = fullNameTxtInput.text;
+					user.userType = userTypeCmb.selectedItem;
+					user.username = userNameTxtInput.text;
+					user.password = passwordTxtInput.text;
+					user.date = FormatUtil.dateToString(new Date());
+					user.isNew = true;
+					loadApp.userList.addItem(user);
+				}
+				user_VBox();
+			}
+			
+			protected function addSalePersonBtn_clickHandler():void {
+				var isError:Boolean = true;
+				if(empIdTxtInput.text == "" || empIdTxtInput.text == null){
+					isError = false;
+					return;
+				}
+				if(nameTxtInput.text == "" || nameTxtInput.text == null){
+					isError = false;
+					return;
+				}
+				if(salaryTxtInput.text == "" || salaryTxtInput.text == null){
+					isError = false;
+					return;
+				}
+				if(phoneNoTxtInput.text == "" || phoneNoTxtInput.text == null){
+					isError = false;
+					return;
+				}
+				var employerArr:ArrayCollection = loadApp.employerList;
+				for(var i:int=0;i<employerArr.length;i++){
+					var employerS:Employer = employerArr.getItemAt(i) as Employer;
+					if(employerS.empId == Number(empIdTxtInput.text)){
+						isError = false;
+					}
+					if(employerS.fullName == nameTxtInput.text){
+						isError = false;
+					}
+				}
+				if(isError){
+					var employee:Employer = new Employer();
+					employee.empId = Number(empIdTxtInput.text);
+					employee.fullName = nameTxtInput.text;
+					employee.joiningDate = FormatUtil.dateToString(joiningDate.selectedDate);
+					employee.salary = Number(salaryTxtInput.text);
+					employee.phoneNo = phoneNoTxtInput.text;
+					employee.isNew = true;
+					loadApp.employerList.addItem(employee);
+				}
+				salesPerson_VBox();
+			}
+			
+			protected function category_clickHandler():void {
+				var isAlready:Boolean = true;
+				if(categoryTxtInput.text != ""){
+					for(var i:int=0;i<loadApp.categorys.length;i++){
+						var value:String = loadApp.categorys.getItemAt(i) as String;
+						if(value.toLowerCase() == categoryTxtInput.text.toLowerCase()){
+							isAlready = false;
+						}
+					}
+					if(isAlready){
+						loadApp.categorys.addItem(categoryTxtInput.text)
+						categoryTxtInput.text = "";
+					}
+				}
+			}
+			
+			protected function size_clickHandler():void {
+				var isAlready:Boolean = true;
+				if(sizeTxtInput.text != ""){
+					for(var i:int=0;i<loadApp.sizeList.length;i++){
+						var value:String = loadApp.sizeList.getItemAt(i) as String;
+						if(value.toLowerCase() == sizeTxtInput.text.toLowerCase()){
+							isAlready = false;
+						}
+					}
+					if(isAlready){
+						loadApp.sizeList.addItem(sizeTxtInput.text)
+						sizeTxtInput.text = "";
+					}
+				}
+			}
+			
+			public function deleteUser():void {
+				var deleteUserList:ArrayCollection;
+				var index:int = userDataGrid.selectedIndex;
+				if(loadApp.userList.getItemAt(index) != null){
+					var user:User = loadApp.userList.getItemAt(index) as User;
+					if(user.userType != 'systemadmin'){
+						loadApp.userList.removeItemAt(index);
+						deleteUserList = new ArrayCollection();
+						deleteUserList.addItem(user);
+						loadApp.deleteUserList =  deleteUserList;
+					}
+				}
+			}
+			
+			public function deleteSaleperson():void {
+				var deleteEmployerList:ArrayCollection;
+				var index:int = salesPersonDataGrid.selectedIndex;
+				if(loadApp.employerList.getItemAt(index) != null){
+					var employer:Employer = loadApp.employerList.getItemAt(index) as Employer;
+					loadApp.employerList.removeItemAt(index);
+					deleteEmployerList = new ArrayCollection();
+					deleteEmployerList.addItem(employer);
+					loadApp.deleteEmployerList =  deleteEmployerList;
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:VGroup width="100%" height="100%" paddingBottom="5" paddingTop="5" paddingLeft="5" paddingRight="5">
+		<s:HGroup width="100%" height="100%" gap="0">
+			<mx:TabBar id="tabBar" width="150" dataProvider="{arr}" tabWidth="150" tabHeight="50" direction="vertical"
+				   itemClick="tabBar_itemClick(event)"/>
+			<mx:ViewStack id="viewStack" width="100%" height="100%">
+				<!--application -->
+				<mx:VBox id="applicationVBox" width="100%" height="100%" horizontalAlign="center" styleName="colorBorder" verticalAlign="middle"
+						 paddingBottom="5" paddingTop="5" paddingLeft="5" paddingRight="5" creationComplete="application_VBox()">
+					<s:HGroup width="100%">
+						<s:HGroup width="100%" horizontalAlign="center">
+							<s:VGroup width="50%" horizontalAlign="right" paddingRight="10">
+								<mx:Label text="Default Item Code :" styleName="FormlabelStyle" includeIn="SystemAdmin"/>
+								<!--<mx:Label text=" " styleName="FormlabelStyle" includeIn="SystemAdmin"/>-->
+								<mx:Label text="GST Rate (%) :" styleName="FormlabelStyle" height="27"/>
+								<mx:Label text="GST Tin :" styleName="FormlabelStyle" height="25"/>
+								<mx:Label text="Show GST :" styleName="FormlabelStyle"/>
+								<mx:Label text="Include GST Amount :" styleName="FormlabelStyle"/>
+							</s:VGroup>
+							<s:VGroup width="50%" horizontalAlign="left">
+								<!--<s:CheckBox id="itemCode" includeIn="SystemAdmin" />-->
+								<s:TextInput id="itemCodeNoTxtInput" styleName="TextInputStyle" includeIn="SystemAdmin"/>
+								<s:TextInput id="gstRatesTxtInput" styleName="TextInputStyle"/>
+								<s:TextInput id="gstTinTxtInput" styleName="TextInputStyle"/>
+								<s:CheckBox id="showGST" />
+								<s:CheckBox id="includeGSTAmt" enabled="{showGST.selected}" />
+							</s:VGroup>
+						</s:HGroup>
+						<s:HGroup width="100%" horizontalAlign="center">
+							<s:VGroup width="50%" horizontalAlign="right" paddingRight="10">
+								<mx:Label text="Show Customer :" styleName="FormlabelStyle"/>
+								<mx:Label text="Show Saleperson :" styleName="FormlabelStyle" />
+								<mx:Label text="Show Size :" styleName="FormlabelStyle" />
+								<mx:Label text="Amount Received :" styleName="FormlabelStyle" />
+								<mx:Label text="Machine Name :" styleName="FormlabelStyle" includeIn="SystemAdmin"/>
+							</s:VGroup>
+							<s:VGroup width="50%" horizontalAlign="left">
+								<s:CheckBox id="showCustomer"  />
+								<s:CheckBox id="showEmployee"  />
+								<s:CheckBox id="showSize" />
+								<s:CheckBox id="amtReceived" />
+								<s:CheckBox id="machineName" includeIn="SystemAdmin" />
+								<s:TextInput id="machineNameTxtInput" styleName="TextInputStyle" enabled="{machineName.selected}" includeIn="SystemAdmin" />
+							</s:VGroup>  
+						</s:HGroup>
+					</s:HGroup>
+				</mx:VBox>
+				
+				<!-- Config -->
+				<mx:VBox id="configVBox" width="100%" height="100%" styleName="colorBorder" paddingBottom="5" paddingTop="5" paddingLeft="5" paddingRight="5">
+					<s:HGroup width="100%" creationComplete="config_VBox()">
+						<s:HGroup width="100%" horizontalAlign="center">
+							<s:VGroup width="50%" height="100%" horizontalAlign="right" paddingRight="10">
+								<mx:Label text="Category :" styleName="FormlabelStyle"/>
+							</s:VGroup>
+							<s:VGroup width="50%" horizontalAlign="left">
+								<s:List id="categoryListId" width="100%" height="200" verticalScrollPolicy="auto" horizontalScrollPolicy="auto" />
+								<s:HGroup width="100%">
+									<s:TextInput id="categoryTxtInput" styleName="TextInputStyle" width="80%"/>
+									<s:Image source="@Embed('/images/icon/add_20.png')" useHandCursor="true" buttonMode="true" click="category_clickHandler()" />
+								</s:HGroup>
+							</s:VGroup>
+						</s:HGroup>
+						<s:HGroup width="100%" horizontalAlign="center">
+							<s:VGroup width="50%" height="100%" horizontalAlign="right" paddingRight="10">
+								<mx:Label text="Size :" styleName="FormlabelStyle"/>
+							</s:VGroup>
+							<s:VGroup width="50%" horizontalAlign="left">
+								<s:List id="sizeListId" width="100%" enabled="{showSize.selected}"  height="200" verticalScrollPolicy="auto" horizontalScrollPolicy="auto" />
+								<s:HGroup width="100%">
+									<s:TextInput id="sizeTxtInput" styleName="TextInputStyle" width="80%"/>
+									<s:Image source="@Embed('/images/icon/add_20.png')" useHandCursor="true" buttonMode="true" click="size_clickHandler()" />
+								</s:HGroup>
+							</s:VGroup>
+						</s:HGroup>
+					</s:HGroup>
+				</mx:VBox>
+				
+				<!-- Printer -->
+				<mx:VBox id="printerVBox" width="100%" height="100%" styleName="colorBorder" paddingBottom="5" paddingTop="5" paddingLeft="5" paddingRight="5" verticalAlign="middle">
+					<s:HGroup width="100%" horizontalAlign="center" creationComplete="printer_VBox()">
+						<s:VGroup width="30%" horizontalAlign="right" paddingRight="10" gap="10">
+							<mx:Label text="Printer Name :" styleName="FormlabelStyle"/>
+							<mx:Label text="Label Printer Name :" styleName="FormlabelStyle"/>
+							<mx:Label text="Name :" styleName="FormlabelStyle"/>
+							<mx:Label text="Address 1 :" styleName="FormlabelStyle"/>
+							<mx:Label text="Address 2 :" styleName="FormlabelStyle"/>
+							<mx:Label text="Phone :" styleName="FormlabelStyle"/>
+							<!--<mx:Label text="Print GST :" styleName="FormlabelStyle"/>-->
+						</s:VGroup>
+						<s:VGroup width="50%" horizontalAlign="left">
+							<s:ComboBox width="80%" styleName="ComboBoxStyle" id="printerNameCmb" />
+							<s:ComboBox width="80%" styleName="ComboBoxStyle" id="labelPrinterNameCmb" />
+							<s:TextInput id="namesTxtInput" styleName="TextInputStyle" width="80%"/>
+							<s:TextInput id="printAddress1" styleName="TextInputStyle" width="80%"/>
+							<s:TextInput id="printAddress2" styleName="TextInputStyle" width="80%"/>
+							<s:TextInput id="printPhone" styleName="TextInputStyle" width="80%"/>
+							<!--<s:CheckBox id="printGST" />-->
+						</s:VGroup>
+					</s:HGroup>
+				</mx:VBox>
+				
+				<!-- User -->
+				<mx:VBox id="userVBox" width="100%" height="100%" styleName="colorBorder" paddingBottom="5" paddingTop="5" paddingLeft="5" paddingRight="5">
+					<mx:DataGrid width="100%" id="userDataGrid" focusEnabled="false" rowCount="5" horizontalScrollPolicy="off"
+								 verticalScrollPolicy="auto" styleName="CustomDataGrid">
+						<mx:columns>
+							<mx:DataGridColumn dataField="fullName" headerText="Full Name" textAlign="center" minWidth="100" 
+											   headerStyleName="dataGridHeaderStyle" />
+							<mx:DataGridColumn dataField="date" headerText="Date" textAlign="center" minWidth="100" 
+											   headerStyleName="dataGridHeaderStyle" />
+							<mx:DataGridColumn dataField="username" headerText="Username" textAlign="center" minWidth="100" 
+											   headerStyleName="dataGridHeaderStyle" />
+							<mx:DataGridColumn dataField="password" headerText="Password" textAlign="center" minWidth="100" 
+											   headerStyleName="dataGridHeaderStyle" includeIn="SystemAdmin" />
+							<mx:DataGridColumn dataField="userType" headerText="User Type" textAlign="center" minWidth="100" 
+											   headerStyleName="dataGridHeaderStyle" />
+							<mx:DataGridColumn editable="false" minWidth="30" width="35">
+								<mx:itemRenderer>
+									<fx:Component>
+										<mx:HBox width="100%" height="15" horizontalAlign="center" verticalAlign="middle">
+											<mx:Button icon="@Embed(source='/images/delete.png')" useHandCursor="true" buttonMode="true"
+													   click="outerDocument.deleteUser()" toolTip="Delete" width="15" height="15"/>
+										</mx:HBox>
+									</fx:Component>
+								</mx:itemRenderer>
+							</mx:DataGridColumn>
+						</mx:columns>
+					</mx:DataGrid>
+					<s:HGroup width="100%" horizontalAlign="center" creationComplete="user_VBox()">
+						<s:HGroup width="50%" horizontalAlign="center">
+							<s:VGroup width="30%" horizontalAlign="right" paddingRight="10" gap="5">
+								<mx:Label text="Full Name :" styleName="FormlabelStyle"/>
+								<mx:Label text="Username :" styleName="FormlabelStyle"/>
+							</s:VGroup>
+							<s:VGroup width="50%" horizontalAlign="left">
+								<s:TextInput id="fullNameTxtInput" styleName="TextInputStyle" width="100%" tabIndex="1"/>
+								<s:TextInput id="userNameTxtInput" styleName="TextInputStyle" width="100%" tabIndex="3"/>
+							</s:VGroup>
+						</s:HGroup>
+						<s:HGroup width="50%" horizontalAlign="center">
+							<s:VGroup width="30%" horizontalAlign="right" paddingRight="10" gap="5">
+								<mx:Label text="User Type :" styleName="FormlabelStyle"/>
+								<mx:Label text="Password :" styleName="FormlabelStyle"/>
+							</s:VGroup>
+							<s:VGroup width="50%" horizontalAlign="left">
+								<s:ComboBox width="100%" id="userTypeCmb" styleName="ComboBoxStyle" selectedIndex="0" 
+											dataProvider="{userTypeArr}" tabIndex="2" />
+								<s:TextInput id="passwordTxtInput" styleName="TextInputStyle" width="100%" displayAsPassword="true" tabIndex="4"/>
+								<s:Button id="addUserBtn" label="Add" width="70" height="30" styleName="DefaultGoldButton" 
+										  useHandCursor="true" buttonMode="true" click="addUserBtn_clickHandler()" tabIndex="5"/>
+							</s:VGroup>
+						</s:HGroup>
+					</s:HGroup>
+				</mx:VBox>
+				
+				<!--Sale Person -->
+				<mx:VBox id="salesPersonVBox" width="100%" height="100%" styleName="colorBorder" paddingBottom="5" paddingTop="5" paddingLeft="5" paddingRight="5">
+					<mx:DataGrid width="100%" id="salesPersonDataGrid" focusEnabled="false" rowCount="5" horizontalScrollPolicy="off"
+								 verticalScrollPolicy="auto" styleName="CustomDataGrid">
+						<mx:columns>
+							<mx:DataGridColumn dataField="empId" headerText="Employee Id" textAlign="center" minWidth="100" 
+											   headerStyleName="dataGridHeaderStyle" />
+							<mx:DataGridColumn dataField="fullName" headerText="Name" textAlign="center" minWidth="100" 
+											   headerStyleName="dataGridHeaderStyle" />
+							<mx:DataGridColumn dataField="joiningDate" headerText="Joining Date" textAlign="center" minWidth="100" 
+											   headerStyleName="dataGridHeaderStyle" />
+							<mx:DataGridColumn dataField="salary" headerText="Salary" textAlign="center" minWidth="100" 
+											   headerStyleName="dataGridHeaderStyle" />
+							<mx:DataGridColumn dataField="phoneNo" headerText="Phone No" textAlign="center" minWidth="100" 
+											   headerStyleName="dataGridHeaderStyle" />
+							<mx:DataGridColumn editable="false" minWidth="30" width="35">
+								<mx:itemRenderer>
+									<fx:Component>
+										<mx:HBox width="100%" height="15" horizontalAlign="center" verticalAlign="middle">
+											<mx:Button icon="@Embed(source='/images/delete.png')" useHandCursor="true" buttonMode="true"
+													   click="outerDocument.deleteSaleperson()" toolTip="Delete" width="15" height="15"/>
+										</mx:HBox>
+									</fx:Component>
+								</mx:itemRenderer>
+							</mx:DataGridColumn>
+						</mx:columns>
+					</mx:DataGrid>
+					<s:HGroup width="100%" horizontalAlign="center" creationComplete="salesPerson_VBox()">
+						<s:HGroup width="50%" horizontalAlign="center">
+							<s:VGroup width="30%" horizontalAlign="right" paddingRight="10" gap="5">
+								<mx:Label text="Employee Id :" styleName="FormlabelStyle"/>
+								<mx:Label text="Joining Date :" styleName="FormlabelStyle"/>
+								<mx:Label text="Phone No :" styleName="FormlabelStyle"/>
+							</s:VGroup>
+							<s:VGroup width="50%" horizontalAlign="left">
+								<s:TextInput id="empIdTxtInput" styleName="TextInputStyle" width="100%" restrict="0-9" maxChars="4" tabIndex="1" />
+								<mx:DateField id="joiningDate" formatString="{FormatUtil.DATE_PICKER_FORMAT}" selectedDate="{new Date()}" tabIndex="3"/>
+								<s:TextInput id="phoneNoTxtInput" styleName="TextInputStyle" width="100%" restrict="0-9" maxChars="10" tabIndex="5"/>
+							</s:VGroup>
+						</s:HGroup>
+						<s:HGroup width="50%" horizontalAlign="center">
+							<s:VGroup width="30%" horizontalAlign="right" paddingRight="10" gap="5">
+								<mx:Label text="Name :" styleName="FormlabelStyle"/>
+								<mx:Label text="Salary :" styleName="FormlabelStyle"/>
+							</s:VGroup>
+							<s:VGroup width="50%" horizontalAlign="left">
+								<s:TextInput id="nameTxtInput" styleName="TextInputStyle" width="100%" tabIndex="2"/>
+								<s:TextInput id="salaryTxtInput" styleName="TextInputStyle" width="100%" restrict="0-9" tabIndex="4"/>
+								<s:Button id="addSalePersonBtn" label="Add" width="70" height="30" styleName="DefaultGoldButton"
+										  useHandCursor="true" buttonMode="true" click="addSalePersonBtn_clickHandler()" tabIndex="6"/>
+							</s:VGroup>
+						</s:HGroup>
+					</s:HGroup>
+				</mx:VBox>
+			</mx:ViewStack>
+		</s:HGroup>
+		<s:HGroup width="100%" horizontalAlign="right" paddingTop="5" paddingRight="10" paddingBottom="5">
+			<!--<s:Button id="resetBtn" label="Restore Default" width="100" height="30" styleName="DefaultButton" useHandCursor="true" buttonMode="true"
+					  click="resetBtn_clickHandler()"/>-->
+			<s:Button id="updateBtn" label="Update" width="100" height="30" styleName="DefaultGoldButton" useHandCursor="true" buttonMode="true"
+					  click="updateBtn_clickHandler()"/>
+		</s:HGroup>
+	</s:VGroup>
+</s:TitleWindow>

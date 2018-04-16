@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 width="350" height="150" title="Open Bill"
+		 styleName="panelStyle"
+		 backgroundColor="#f7f8f5"
+		 close="remove()">
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import com.arun.billingsystem.common.Constant;
+			import com.arun.billingsystem.common.ErrorConstant;
+			import com.arun.billingsystem.domain.Purchase;
+			import com.arun.billingsystem.event.RootEvent;
+			
+			import mx.managers.PopUpManager;
+			
+			[Dispatcher]public var dispatch:IEventDispatcher;
+			
+			protected function okBtn_clickHandler():void
+			{
+				var billNo:String = openBillTxtInput.text;
+				if(billNo != "" && billNo != null){
+					var purchase:Purchase = new Purchase();
+					purchase.billNo =  billNo;
+					
+					var rootEvent:RootEvent = new RootEvent(RootEvent.EVENT_CONFIRMATION);
+					rootEvent.popUpType = Constant.BILL_OPEN;
+					rootEvent.purchase = purchase;
+					dispatch.dispatchEvent(rootEvent);
+					
+					PopUpManager.removePopUp(this);
+				} else {
+					ShowAlert.show(ErrorConstant.ERROR_128, Constant.POP_UP, Constant.SHOW_IMG_WAR);
+				}
+			}
+			
+			protected function remove():void {
+				PopUpManager.removePopUp(this);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:VGroup width="100%" height="100%" gap="20" paddingTop="10" verticalAlign="middle">
+		<s:HGroup width="100%" horizontalAlign="center" verticalAlign="middle">
+			<mx:Label text="Enter Bill No :" styleName="FormlabelStyle"/>
+			<s:TextInput id="openBillTxtInput" styleName="TextInputStyle" creationComplete="{openBillTxtInput.setFocus()}" />
+		</s:HGroup>
+		<s:HGroup width="100%" horizontalAlign="center" verticalAlign="middle">
+			<s:Button label="OK" width="100" height="30" id="okBtn" styleName="DefaultGoldButton" click="okBtn_clickHandler()"/>
+			<s:Button label="Cancel" width="100" height="30" id="cancelBtn" styleName="DefaultButton" click="remove()"/>
+		</s:HGroup>
+	</s:VGroup>
+</s:TitleWindow>

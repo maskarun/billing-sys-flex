@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%">
+	<fx:Script>
+		<![CDATA[
+			import com.arun.billingsystem.common.Constant;
+			import com.arun.billingsystem.common.ErrorConstant;
+			import com.arun.billingsystem.domain.Search;
+			import com.arun.billingsystem.domain.Stock;
+			import com.arun.billingsystem.model.ReportModel;
+			import com.arun.billingsystem.model.UserModel;
+			import com.arun.billingsystem.model.presentation.ReportPresentation;
+			import com.arun.billingsystem.service.ReportServiceHelper;
+			import com.arun.billingsystem.util.FormatUtil;
+			import com.arun.billingsystem.view.popups.ShowAlert;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.CalendarLayoutChangeEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ListEvent;
+			
+			[Inject(source="userModel")]
+			public var userModel:UserModel;
+			[Inject(source="reportModel")]
+			public var reportModel:ReportModel;
+			[Inject(source="reportServiceHelper")]
+			public var reportServiceHelper:ReportServiceHelper;
+			private var balanceValue:Number;
+			
+			protected function vbox1_creationCompleteHandler():void {
+				if(userModel != null){
+					purchaseReportDG.dataProvider = userModel.purchaseNameList;
+				}
+			}
+			
+			protected function purchaseReportDG_itemClickHandler(event:ListEvent):void {
+				var purchaserName:String = event.target.selectedItem as String;
+				if(purchaserName != null && purchaserName != "") {
+					purchaseNameTxt.text = purchaserName;
+					reportServiceHelper.stock_Purchase(purchaserName);
+				}
+			}
+			
+			public function clearfields():void {
+				settledDate.selectedDate = new Date();
+				amtSettledNowTxtInput.text = "";
+			}
+			
+			[EventHandler(event="RootEvent.EVENT_REPORT_PURCHASE")]
+			public function getStockPurchaseModel():void {
+				var stckPurchaserList:ArrayCollection = reportModel.stkPurchaserList;
+				if(stckPurchaserList != null){
+					purchaserDetailDG.dataProvider = stckPurchaserList;
+					var purtotalAmt:Number = 0;var amtSettled:Number = 0; var purName:String;
+					for(var i:int=0; i<stckPurchaserList.length; i++){
+						var stk:Stock = stckPurchaserList.getItemAt(i) as Stock;
+						purtotalAmt = purtotalAmt + stk.totalAmount;
+						amtSettled = amtSettled + stk.purchaseAmtSettled;
+						purName =  stk.purchaseName;
+						if(stk.totalAmount == 0 && stk.purchaseAmtSettled > 0){
+							stk.isCheckBoxSelected = true
+						}
+					}
+					purchaseAmoutTxt.text = String(purtotalAmt);
+					amtSettledTxt.text = String(amtSettled);
+					balanceValue = (purtotalAmt - amtSettled);
+					balanceAmtTxt.text = String(balanceValue);
+				}
+				clearfields();
+			}
+			
+			protected function addBtn_clickHandler():void {
+				var amtSettledNow:Number = Number(amtSettledNowTxtInput.text);
+				var descriptiontxt:String = descriptionTxtInput.text;
+				if(amtSettledNow != 0 && descriptiontxt != null){
+					var stock:Stock = new Stock();
+					stock.purchaseDate = FormatUtil.dateToString(settledDate.selectedDate);
+					stock.purchaseName = purchaseNameTxt.text;
+					stock.purchaseAmtSettled = amtSettledNow;
+					stock.comments = descriptiontxt;
+					stock.isCheckBoxSelected = true;
+					stock.totalAmount = 0;
+					stock.type = Constant.STOCK_ADD;
+					if(amtSettledNow <= balanceValue){
+						reportServiceHelper.stock_addPurchase(stock);
+					} else {
+						ShowAlert.show(ErrorConstant.ERROR_141, Constant.POP_UP, Constant.SHOW_IMG_WAR);
+					}
+				} else {
+					ShowAlert.show(ErrorConstant.ERROR_124, Constant.POP_UP, Constant.SHOW_IMG_WAR);
+				}
+			}
+			
+			public function deleteBtnHandler():void {
+				var stock:Stock = purchaserDetailDG.selectedItem as Stock;
+				if(stock != null){
+					stock.type = Constant.STOCK_DELETE;
+					reportServiceHelper.stock_addPurchase(stock);
+					var index:int = reportModel.stkPurchaserList.getItemIndex(stock);
+					reportModel.stkPurchaserList.removeItemAt(index);
+					getStockPurchaseModel();
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<mx:VBox width="100%" height="100%" creationComplete="vbox1_creationCompleteHandler()">
+		
+		<s:HGroup width="100%" height="100%" paddingLeft="5" paddingRight="5" paddingBottom="5">
+			<mx:DataGrid id="purchaseReportDG" width="45%" height="100%" focusEnabled="false" horizontalScrollPolicy="off"
+							verticalScrollPolicy="auto" styleName="CustomDataGrid" itemClick="purchaseReportDG_itemClickHandler(event)">
+				<mx:columns>
+					<mx:DataGridColumn dataField="purchaseName" headerText="Purchase Name" headerStyleName="dataGridHeaderStyle" />
+				</mx:columns>
+			</mx:DataGrid>
+		
+			<s:VGroup width="100%" height="100%" paddingLeft="5" paddingRight="5" paddingBottom="5">
+				<mx:HBox width="100%" height="30%">
+					<mx:VBox width="50%" height="100%" verticalAlign="middle" horizontalAlign="center" styleName="colorBorder" id="nameHgroup">
+						<s:HGroup width="100%" horizontalAlign="right" paddingRight="50" gap="10">
+							<mx:Label text="Purchase Name :" styleName="FormlabelStyle"/>
+							<mx:Text id="purchaseNameTxt" styleName="TextStyle" width="200"/>
+						</s:HGroup>
+						<s:HGroup width="100%" horizontalAlign="right" paddingRight="50" gap="10">
+							<mx:Label text="Purchase Amount :" styleName="FormlabelStyle"/>
+							<mx:Text id="purchaseAmoutTxt" styleName="TextStyle" width="200"/>
+						</s:HGroup>
+						<s:HGroup width="100%" horizontalAlign="right" paddingRight="50" gap="10">
+							<mx:Label text="Amount Settled :" styleName="FormlabelStyle"/>
+							<mx:Text id="amtSettledTxt" styleName="TextStyle" width="200"/>
+						</s:HGroup>
+						<s:HGroup width="100%" horizontalAlign="right" paddingRight="50" gap="10">
+							<mx:Label text="Balance Amount :" styleName="FormlabelStyle"/>
+							<mx:Text id="balanceAmtTxt" styleName="TextStyle" width="200"/>
+						</s:HGroup>
+					</mx:VBox>
+					<s:VGroup width="50%" height="100%" horizontalAlign="center" verticalAlign="middle">
+						<mx:VBox width="100%" verticalAlign="middle" horizontalAlign="center" styleName="colorBorder" paddingTop="10" paddingBottom="10">
+							<s:HGroup width="100%" horizontalAlign="right" paddingRight="130" gap="10">
+								<mx:Label text="Date :" styleName="FormlabelStyle" />
+								<mx:DateField id="settledDate" selectedDate="{new Date()}"/>
+							</s:HGroup>
+							<s:HGroup width="100%" horizontalAlign="right" paddingRight="80" gap="10">
+								<mx:Label text="Amount :" styleName="FormlabelStyle" />
+								<s:TextInput id="amtSettledNowTxtInput" styleName="TextInputStyle" width="150" restrict="[0-9]-."/>
+							</s:HGroup>
+							<s:HGroup width="100%" horizontalAlign="right" paddingRight="80" gap="10">
+								<mx:Label text="Description :" styleName="FormlabelStyle" />
+								<s:TextInput id="descriptionTxtInput" styleName="TextInputStyle" width="150"/>
+							</s:HGroup>
+							<s:HGroup width="100%" horizontalAlign="right" paddingRight="80" gap="10">
+								<s:Button id="addBtn" label="Add" width="90" styleName="DefaultButton" useHandCursor="true" buttonMode="true"
+									  click="addBtn_clickHandler()"/>
+							</s:HGroup>
+						</mx:VBox>
+					</s:VGroup>
+				</mx:HBox>
+				
+				<mx:DataGrid id="purchaserDetailDG" width="100%" height="100%" focusEnabled="false" horizontalScrollPolicy="off"
+							 verticalScrollPolicy="auto" styleName="CustomDataGrid">
+					<mx:columns>
+						<mx:DataGridColumn dataField="id" headerText="Id" headerStyleName="dataGridHeaderStyle" textAlign="center" visible="false"/>
+						<mx:DataGridColumn dataField="purchaseDate" width="130" headerText="Purchase Date" headerStyleName="dataGridHeaderStyle" textAlign="center" />
+						<mx:DataGridColumn dataField="purchaseQty" width="80" headerText="Total Qty" headerStyleName="dataGridHeaderStyle" sortable="false" textAlign="center" />
+						<mx:DataGridColumn dataField="comments" headerText="Descriptions" headerStyleName="dataGridHeaderStyle" sortable="false" />
+						<mx:DataGridColumn dataField="totalAmount" width="150" headerText="Purchase Amount" headerStyleName="dataGridHeaderStyle" sortable="false">
+							<mx:itemRenderer>
+								<fx:Component>
+									<mx:HBox width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" creationComplete="hbox1_creationCompleteHandler(event)">
+										<fx:Script>
+											<![CDATA[
+												import mx.events.FlexEvent;
+												
+												protected function hbox1_creationCompleteHandler(event:FlexEvent):void {
+													if(data.totalAmount == 0){
+														dataStatus.text = '';
+													} else {
+														dataStatus.text = String(data.totalAmount);
+													}
+												}
+											]]>
+										</fx:Script>
+										<s:Label id="dataStatus"/>
+									</mx:HBox>
+								</fx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+						<mx:DataGridColumn dataField="purchaseAmtSettled" width="150" headerText="Amt Settled" headerStyleName="dataGridHeaderStyle" sortable="false">
+							<mx:itemRenderer>
+								<fx:Component>
+									<mx:HBox width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" creationComplete="purchaseAmt_creationCompleteHandler(event)">
+										<fx:Script>
+											<![CDATA[
+												import mx.events.FlexEvent;
+												
+												protected function purchaseAmt_creationCompleteHandler(event:FlexEvent):void {
+													if(data.purchaseAmtSettled == 0){
+														dataStatus.text = '';
+													} else {
+														dataStatus.text  = String(data.purchaseAmtSettled);
+														dataStatus.styleName = "UpdatedStyle";
+													}
+												}
+											]]>
+										</fx:Script>
+										<s:Label id="dataStatus"/>
+									</mx:HBox>
+								</fx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+						<mx:DataGridColumn editable="false" minWidth="30" width="35">
+							<mx:itemRenderer>
+								<fx:Component>
+									<mx:HBox width="100%" height="15" horizontalAlign="center" verticalAlign="middle">
+										<mx:Button icon="@Embed(source='/images/delete.png')" useHandCursor="true" buttonMode="true" id="deleteBtn"
+												   toolTip="Delete" width="15" height="15" visible="{data.isCheckBoxSelected}"
+												   click="outerDocument.deleteBtnHandler()"/>
+									</mx:HBox>
+								</fx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+					</mx:columns>
+				</mx:DataGrid>
+			</s:VGroup>
+		</s:HGroup>
+		
+	</mx:VBox>
+</s:Group>

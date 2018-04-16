@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 width="100%" height="100%" title="Stock Add"
+		 styleName="panelStyle"
+		 backgroundColor="#f7f8f5"
+		 close="cancelBtn_clickHandler()" xmlns:autocomplete="com.arun.billingsystem.util.autocomplete.*">
+	<fx:Declarations>
+		<s:RadioButtonGroup id="stockPurchaseRBGroup" />
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.arun.billingsystem.common.Constant;
+			import com.arun.billingsystem.common.ErrorConstant;
+			import com.arun.billingsystem.domain.Stock;
+			import com.arun.billingsystem.domain.StockAdd;
+			import com.arun.billingsystem.event.RootEvent;
+			import com.arun.billingsystem.model.UserModel;
+			import com.arun.billingsystem.util.FormatUtil;
+			import com.arun.billingsystem.util.StringUtil;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Button;
+			import mx.core.FlexGlobals;
+			import mx.core.IVisualElement;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import mx.utils.ObjectUtil;
+			
+			import spark.components.Image;
+			import spark.layouts.HorizontalAlign;
+						
+			[Dispatcher]public var dispatch:IEventDispatcher;
+			
+			private var userModel:UserModel;
+			private static var stockAddPopUp:StockAddPopUp;
+			private static var stockAddStockArr:ArrayCollection = null ; 
+				
+			public static function show(userModel:UserModel):void {
+				if(userModel != null){
+					var stockAddPopUp:StockAddPopUp = new StockAddPopUp();
+					stockAddPopUp.showPopUp(userModel);
+				}
+			}
+			
+			public function showPopUp(userModel:UserModel):void {
+				this.userModel = userModel;
+				PopUpManager.addPopUp(this, FlexGlobals.topLevelApplication.document, true);
+				PopUpManager.centerPopUp(this);
+			}
+			
+			protected function cancelBtn_clickHandler():void {
+				var rootEvent:RootEvent = new RootEvent(RootEvent.EVENT_STOCK_CONFIRMATION);
+				rootEvent.popUpType = Constant.STOCK_CLOSED;
+				dispatch.dispatchEvent(rootEvent);
+				PopUpManager.removePopUp(this);
+			}
+			
+			public function stockAdd_creationCompleteHandler():void {
+				if(categoryCmbBox != null) {
+					stockAddStockArr = new ArrayCollection();
+					categoryCmbBox.dataProvider = userModel.categoryList;
+//					purchaseNameTxtInput.dataProvider = userModel.purchaseNameList;
+					addSizeBtn_clickHandler();
+				}
+			}
+			
+//			public function nameTxtInput_focusOutHandler(event:KeyboardEvent):void {
+////				purchaseNameTxtInput.inputTxt.text = purchaseNameTxtInput.inputTxt.
+//			}
+			
+			public function getStockObj(stock:Stock):Stock {
+				if(stock != null && checkComplusoryField()){
+					stock.purchaseName = purchaseNameTxtInput.text;
+					stock.purchaseDate = FormatUtil.dateToString(purchaseDate.selectedDate);
+					stock.purchasePrice = Number(purchaseRateTxtInput.text);
+					stock.comments = commentTxtInput.text;
+					stock.category = categoryCmbBox.selectedItem;
+					stock.itemName = itemNameTxtInput.text;
+					stock.totalAmount = (stock.purchaseQty * stock.purchasePrice);
+					var test:String = stockPurchaseRBGroup.selectedValue as String;
+					if(test != "" && test == 'Yes'){
+						stock.purchaseAmtSettled = stock.totalAmount; 
+					} else {
+						stock.purchaseAmtSettled = 0;
+					}
+					return stock;
+				}
+				return null;
+			}
+			
+			public function addStockBtn_clickHandler():void {
+				var stockList:ArrayCollection = new ArrayCollection();
+				var isAddStock:Boolean = false;
+				var totalPic:Number = 0; var purchasePics:Number = 0;
+				
+				if(stockAddStockArr != null && stockAddStockArr.length > 0){
+					for(var i:int=0; i < stockAddStockArr.length; i++){
+						var stockAdd:StockAdd = stockAddStockArr.getItemAt(i) as StockAdd;
+						var soldRate:Number = Number(stockAdd.soldTxt.text)
+						if(soldRate > 0){
+							var stock:Stock = stockAdd.stock;
+							stock.size = Number(stockAdd.sizeCmb.selectedItem);
+							stock.soldPrice = soldRate;
+							stock.noOfPrint = Number(stockAdd.printTxt.text);
+							if(stock.soldPrice > 0){
+								stock.purchaseQty = stock.noOfPrint;
+								if(getStockObj(stock) != null){
+									isAddStock = true;
+									stockList.addItem(stock);
+								} else {
+									isAddStock = false;
+									break;
+								}
+							}
+							totalPic =  totalPic + stock.noOfPrint;
+							purchasePics = Number(purchaseQtyTxtInput.text);
+						}
+					}
+					if(isAddStock && (purchasePics != totalPic)){
+						isAddStock = false;
+						ShowAlert.show(ErrorConstant.ERROR_140, Constant.POP_UP, Constant.SHOW_IMG_WAR);
+						return ;
+					}
+					if(isAddStock) {
+						var rootEvent:RootEvent = new RootEvent(RootEvent.EVENT_STOCK_CONFIRMATION);
+						rootEvent.popUpType = Constant.STOCK_ADD;
+						rootEvent.stockArr = stockList;
+						dispatch.dispatchEvent(rootEvent);
+						PopUpManager.removePopUp(this);
+					}
+				}
+			}
+			
+			public function checkComplusoryField():Boolean {
+				var isSuccess:Boolean = false;
+				
+				var itemName:String = itemNameTxtInput.text;
+				var category:String = categoryCmbBox.selectedItem;
+				var purchaseRate:Number = Number(purchaseRateTxtInput.text);
+				var purchasePics:Number = Number(purchaseQtyTxtInput.text);
+				var purchaseName:String = purchaseNameTxtInput.text;
+				var purchaseAmtSettle:String = stockPurchaseRBGroup.selectedValue as String;
+				
+				if((itemName == "" && itemName == null) || (purchaseName == "" && purchaseName == null)){
+					ShowAlert.show(ErrorConstant.ERROR_121, Constant.POP_UP, Constant.SHOW_IMG_WAR);
+					return isSuccess;
+				}
+				
+				if((category == "" && category == null)){
+					ShowAlert.show(ErrorConstant.ERROR_122, Constant.POP_UP, Constant.SHOW_IMG_WAR);
+					return isSuccess;
+				}
+				
+				if(purchaseRate <= 0 || purchasePics <= 0){
+					ShowAlert.show(ErrorConstant.ERROR_124, Constant.POP_UP, Constant.SHOW_IMG_WAR);
+					return isSuccess;
+				}
+				
+				if(purchaseAmtSettle == "" || purchaseAmtSettle == null){
+					ShowAlert.show(ErrorConstant.ERROR_124, Constant.POP_UP, Constant.SHOW_IMG_WAR);
+					return isSuccess;
+				}
+				return isSuccess = true;
+			}
+			
+			public function categoryCmbBox_focusOutHandler():void
+			{
+				var category:String = categoryCmbBox.selectedItem;
+				if(userModel.categoryList != null && !StringUtil.contains(userModel.categoryList, category)){
+					categoryCmbBox.selectedIndex = 0;
+					ShowAlert.show(ErrorConstant.ERROR_105, Constant.POP_UP, Constant.SHOW_IMG_WAR);
+				}
+			}
+			
+			public function sizeCmbBox_focusOutHandler(event:FocusEvent):void
+			{
+				var sizeCmb:ComboBox = event.currentTarget as ComboBox ;
+				if(sizeCmb != null) {
+					var size:String =  sizeCmb.selectedItem;
+					if(userModel.sizeList != null && !StringUtil.contains(userModel.sizeList, size)){
+						sizeCmb.selectedIndex = 0;
+						ShowAlert.show(ErrorConstant.ERROR_102, Constant.POP_UP, Constant.SHOW_IMG_WAR);
+					} 
+				}
+			}
+			
+			public function deleteClickEventHandler(event:MouseEvent):void {
+				if(stockHBox.numElements > 1){
+					stockHBox.removeElement(event.currentTarget.parent);
+					if(stockHBox.numElements == 1){
+						var stockHgroup:HGroup = stockHBox.getElementAt(0) as HGroup;
+						stockHgroup.getElementAt(stockHgroup.numElements-1).visible = false;
+					}
+				} 
+			}
+			
+			protected function getLabelVGroup(labelName:String, size:int):VGroup {
+				var label:Label = new Label();
+				label.text = labelName;
+				label.styleName = "FormlabelStyle";
+				
+				var labVGroup:VGroup = getVGroup(size, "right");
+				labVGroup.addElement(label);
+				return labVGroup;
+			}
+			protected function getVGroup(size:int, align:String):VGroup {
+				var vGroup:VGroup = new VGroup();
+				vGroup.width = size;
+				vGroup.horizontalAlign = align;
+				vGroup.verticalAlign = "middle";
+				return vGroup;
+			}
+			
+			public var tabIndexInt:int = 7;
+			protected function addSizeBtn_clickHandler():void {
+				
+				
+				var stockHGroup:HGroup = new HGroup();
+				
+				var sizeComboBox:ComboBox = new ComboBox();
+				sizeComboBox.width = 160;
+				sizeComboBox.styleName = "ComboBoxStyle";
+				sizeComboBox.prompt = "Select";
+				sizeComboBox.dataProvider = userModel.sizeList;
+				this.tabIndexInt = tabIndexInt + 1;
+				sizeComboBox.tabIndex = tabIndexInt;
+				sizeComboBox.addEventListener(FocusEvent.FOCUS_OUT, sizeCmbBox_focusOutHandler); 
+				stockHGroup.addElement(getLabelVGroup("Size : ",90));
+				stockHGroup.addElement(getVGroup(160, "left").addElement(sizeComboBox));
+								
+				var saleTxtInput:TextInput = new TextInput();
+				saleTxtInput.width = 160;
+				saleTxtInput.restrict = "0-9";
+				saleTxtInput.styleName = "TextInputStyle";
+				this.tabIndexInt = tabIndexInt + 1;
+				saleTxtInput.tabIndex = tabIndexInt;
+				stockHGroup.addElement(getLabelVGroup("Sale Price : ", 90));
+				stockHGroup.addElement(getVGroup(160, "left").addElement(saleTxtInput));
+				
+				var printPicTxt:TextInput = new TextInput();
+				printPicTxt.width = 160;
+				printPicTxt.restrict = "0-9";
+				printPicTxt.styleName = "TextInputStyle";
+				this.tabIndexInt = tabIndexInt + 1;
+				printPicTxt.tabIndex = tabIndexInt;
+				stockHGroup.addElement(getLabelVGroup("Pics : ", 70));
+				stockHGroup.addElement(getVGroup(160, "left").addElement(printPicTxt));
+					
+				var deleteImage:Image = new Image();
+				deleteImage.source = "/images/delete.png";
+				deleteImage.useHandCursor = true;
+				deleteImage.buttonMode = true;
+				deleteImage.toolTip = "Click to Delete";
+				deleteImage.width = 20;
+				deleteImage.addEventListener(MouseEvent.CLICK, deleteClickEventHandler);
+				var vgroup:VGroup = getVGroup(120,"left");
+				vgroup.height = 200;
+				stockHGroup.addElement(vgroup.addElement(deleteImage));
+				
+				stockHBox.addElement(stockHGroup);
+				if(stockHBox.numElements == 1){
+					var stockHgroup:HGroup = stockHBox.getElementAt(0) as HGroup;
+					stockHgroup.getElementAt(stockHGroup.numElements-1).visible = false;
+				} else {
+					var stockHgroup1:HGroup = stockHBox.getElementAt(0) as HGroup;
+					stockHgroup1.getElementAt(stockHGroup.numElements-1).visible = true;
+				}
+				var stockAdd:StockAdd = new StockAdd();
+				stockAdd.sizeCmb = sizeComboBox;
+				stockAdd.soldTxt = saleTxtInput;
+				stockAdd.printTxt = printPicTxt;
+				stockAdd.stock = new Stock();
+				stockAddStockArr.addItem(stockAdd);
+			}
+						
+		]]>
+	</fx:Script>
+	
+	<s:VGroup width="100%" height="100%" gap="5" verticalAlign="middle" paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10" 
+			  creationComplete="stockAdd_creationCompleteHandler()"  id="mainVGroup">
+		<mx:VBox width="100%" horizontalAlign="center" styleName="colorBorder" id="purchaseStock"
+				 paddingTop="10" paddingBottom="10" paddingRight="10" paddingLeft="10">
+			<mx:HBox width="100%" horizontalAlign="center" >
+				<s:VGroup width="120" height="100%" horizontalAlign="right" gap="12">
+					<mx:Label text="Purchase Name :" styleName="FormlabelStyle"/>
+					<mx:Label text="Purchase Rate :" styleName="FormlabelStyle"/>
+				</s:VGroup>
+				<s:VGroup height="100%" width="150">
+					<s:TextInput id="purchaseNameTxtInput" width="160" styleName="TextInputStyle" tabIndex="1"/>
+						<s:TextInput id="purchaseRateTxtInput" width="160" restrict="0-9" styleName="TextInputStyle" tabIndex="3"/>
+				</s:VGroup>
+				<s:VGroup width="120" height="100%" horizontalAlign="right" gap="12">
+					<mx:Label text="Purchase Date :" styleName="FormlabelStyle"/>
+					<mx:Label text="Purchase Pics :" styleName="FormlabelStyle"/>
+				</s:VGroup>
+				<s:VGroup height="100%" width="170">
+					<mx:DateField id="purchaseDate" selectedDate="{new Date()}" width="160" />
+					<s:TextInput id="purchaseQtyTxtInput" width="160" restrict="0-9" styleName="TextInputStyle" tabIndex="4"/>
+				</s:VGroup>
+				<s:VGroup height="100%" width="180">
+					<s:RadioButton id="amtSettled" label="Credit" styleName="TextStyle" value="Yes" groupName="stockPurchaseRBGroup" />
+					<s:RadioButton id="amtNotSettled" label="Debit" styleName="TextStyle" value="No" groupName="stockPurchaseRBGroup" />
+				</s:VGroup>
+			</mx:HBox>
+			<s:HGroup width="100%" paddingRight="10">
+				<s:VGroup width="120" height="100%" horizontalAlign="right">
+					<mx:Label text="Comments :" styleName="FormlabelStyle"/>
+				</s:VGroup>
+				<s:TextInput id="commentTxtInput" styleName="TextInputStyle" width="100%" tabIndex="5"/>
+			</s:HGroup>
+		</mx:VBox>
+		
+		<mx:HBox width="100%" horizontalAlign="center" styleName="colorBorder" id="saleStock"
+				 paddingTop="10" paddingBottom="10" paddingRight="10">
+			<s:VGroup width="120" height="100%" horizontalAlign="right" gap="12">
+				<mx:Label text="Category :" styleName="FormlabelStyle"/>
+			</s:VGroup>
+			<s:VGroup height="100%" width="160">
+				<s:ComboBox id="categoryCmbBox" width="160" styleName="ComboBoxStyle" prompt="Select" 
+							focusOut="categoryCmbBox_focusOutHandler()" tabIndex="6"/>
+			</s:VGroup>
+			
+			<s:VGroup width="120" height="100%" horizontalAlign="right" gap="12">
+				<mx:Label text="Item Name :" styleName="FormlabelStyle"/>
+			</s:VGroup>
+			<s:VGroup height="100%" width="160">
+				<s:TextInput id="itemNameTxtInput" width="160" styleName="TextInputStyle" tabIndex="7" />
+			</s:VGroup>
+		</mx:HBox>
+		
+		<s:HGroup width="100%" horizontalAlign="right" verticalAlign="middle">
+			<mx:LinkButton icon="@Embed('./images/icon/add_32.png')" label="Add" useHandCursor="true" buttonMode="true" click="addSizeBtn_clickHandler()"/>
+		</s:HGroup>
+		
+		<mx:HBox width="100%" horizontalAlign="center" styleName="colorBorder"
+				 paddingTop="10" paddingBottom="10" paddingRight="10">
+			<s:VGroup width="100%" height="100%" id="stockHBox">
+			</s:VGroup>
+		</mx:HBox>
+		
+		<s:HGroup width="100%" paddingBottom="10" paddingTop="10">
+			<s:HGroup width="100%" horizontalAlign="right" verticalAlign="middle">
+				<mx:LinkButton icon="@Embed('./images/icon/addstock1_32.png')" label="Add Stock" useHandCursor="true" buttonMode="true" click="addStockBtn_clickHandler()"/>
+			</s:HGroup>	
+		</s:HGroup>
+	</s:VGroup>
+</s:TitleWindow>

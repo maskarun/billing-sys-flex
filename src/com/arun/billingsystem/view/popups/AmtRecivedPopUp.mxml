@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="100%" height="100%" minWidth="400"
+			   backgroundColor="#f7f8f5" 
+			   close="cancelBtn_clickHandler()"
+			   styleName="panelStyle" title="Amount Recived">
+	<s:states>
+		<mx:State name="ShowAmtReceived" />
+		<mx:State name="ShowEmployee" />
+		<mx:State name="ShowCustomer" />
+		<mx:State name="ShowAmtRctEmployee" />
+		<mx:State name="ShowAmtRctCustomer" />
+		<mx:State name="DontShowAny" />
+	</s:states>
+	<fx:Declarations>
+		<s:RadioButtonGroup id="employerRBGroup" />
+		<s:RadioButtonGroup id="billTypeRBGroup" change="billTypeRBGroup_changeHandler()" />
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.arun.billingsystem.common.Constant;
+			import com.arun.billingsystem.common.ErrorConstant;
+			import com.arun.billingsystem.domain.Customer;
+			import com.arun.billingsystem.domain.Employer;
+			import com.arun.billingsystem.domain.LoadApp;
+			import com.arun.billingsystem.domain.Purchase;
+			import com.arun.billingsystem.domain.User;
+			import com.arun.billingsystem.event.RootEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			import spark.components.RadioButton;
+			
+			[Dispatcher]public var dispatch:IEventDispatcher;
+			
+			private static var amtRecivedPopUp:AmtRecivedPopUp;
+			private var purchase:Purchase;
+			
+			public static function show(employerList:ArrayCollection, purchase:Purchase, loadApp:LoadApp):void {
+				amtRecivedPopUp = new AmtRecivedPopUp();
+				amtRecivedPopUp.showUp(employerList, purchase, loadApp);
+			}
+			
+			public function showUp(employerList:ArrayCollection, purchase:Purchase, loadApp:LoadApp):void {
+				if(purchase != null){
+					this.purchase = purchase;
+					this.purchase.cashier = loadApp.username;
+					PopUpManager.addPopUp(this, FlexGlobals.topLevelApplication.document, true);
+					PopUpManager.centerPopUp(this);
+					if(loadApp.showAmountReceived && loadApp.showEmployee) {
+						currentState = "ShowAmtRctEmployee";
+						radioButton(employerList);
+					} else if(loadApp.showAmountReceived){
+						currentState = "ShowAmtReceived";
+					} else if(loadApp.showCustomer){
+						currentState = "ShowCustomer";
+					} else if(loadApp.showEmployee){
+						currentState = "ShowEmployee";
+						radioButton(employerList);
+					} else {
+						currentState = "DontShowAny";
+					}
+//					if(loadApp.showSize){
+//						noPrintBtn.visible = false;
+//					}
+					purchase.printer = loadApp.printer;
+				}
+			}
+			
+			public function billTypeRBGroup_changeHandler():void
+			{
+				var selectedValue:String = billTypeRBGroup.selectedValue.toString();
+				if(selectedValue != 'CASH'){
+					nameHgroup.enabled = true;
+					phoneHgroup.enabled = true;
+				} else {
+					nameHgroup.enabled = false;
+					phoneHgroup.enabled = false;
+				}
+			}
+			
+			protected function doneBtn_clickHandler(type:String):void {
+				var amtRecived:String = "";
+				var employer:Employer;
+				var billType:String = billTypeRBGroup.selectedValue as String;
+				if(amtRecivedTxtInput != null){
+					amtRecived = amtRecivedTxtInput.text;
+				}
+				if(employerRBGroup != null && employerHgroup != null){
+					employer = employerRBGroup.selectedValue as Employer;
+					if(employer == null){
+						ShowAlert.show(ErrorConstant.ERROR_136, Constant.POP_UP, Constant.SHOW_IMG_WAR);
+						return;
+					}
+				} else {
+					employer = new Employer();
+					employer.empId = 10;
+				}
+				
+				purchase.amountRecived = amtRecived != "" ? Number(amtRecived) : 0;
+				purchase.employer = employer;
+				purchase.billType = billType;
+				if(purchase.customer == null){
+					var customer:Customer = new Customer();
+					customer.status = 'New';
+					purchase.customer = customer;
+				}
+				purchase.customer.fullName = (billerNameTxtInput != null) ? billerNameTxtInput.text : "";
+				purchase.customer.address1 = (address1TxtInput != null) ? address1TxtInput.text : "";
+				purchase.customer.address2 = (address2TxtInput != null) ? address2TxtInput.text : "";
+				purchase.customer.phoneNo = (phoneTxtInput != null) ? phoneTxtInput.text : "";
+			
+				var rootEvent:RootEvent = new RootEvent(RootEvent.EVENT_CONFIRMATION);
+				rootEvent.popUpType = type;
+				rootEvent.purchase = purchase;
+				dispatch.dispatchEvent(rootEvent);
+				PopUpManager.removePopUp(this);
+			}
+			
+			protected function cancelBtn_clickHandler():void {
+				var rootEvent:RootEvent = new RootEvent(RootEvent.EVENT_CONFIRMATION);
+				rootEvent.popUpType = Constant.BILL_CLOSE;
+				dispatch.dispatchEvent(rootEvent);
+				PopUpManager.removePopUp(this);
+			}
+			
+			protected function amt_creationCompleteHandler(event:FlexEvent):void {
+				if(purchase != null){
+					subTotalTxt.text = purchase.subTotal.toString();
+					discountTxt.text = purchase.discount.toString();
+					grandTotalTxt.text = purchase.grandTotal.toString();
+				}
+				if(amtRecivedTxtInput != null){
+					amtRecivedTxtInput.setFocus();
+					balanceTxt.text = "0";
+				} else {
+					done.setFocus();
+				}
+			}
+			
+			protected function radioButton(employerList:ArrayCollection):void {
+				if(employerList != null){
+					for(var i:int=0;i<employerList.length;i++){
+						var radioBtn:RadioButton = new RadioButton();
+						var emp:Employer = employerList.getItemAt(i) as Employer;
+						radioBtn.name = emp.fullName;
+						radioBtn.value = emp;
+						radioBtn.selected = false;
+						radioBtn.label = "(" + emp.empId +") " + emp.fullName;
+						radioBtn.group = employerRBGroup;
+						radioBtn.styleName = "TextStyle";
+						employerHgroup.addElement(radioBtn);
+					}
+				}
+			}
+			
+			protected function done_keyDownHandler(event:KeyboardEvent):void
+			{
+				if(event.keyCode == Keyboard.ENTER){
+					doneBtn_clickHandler(Constant.BILL_PRINT);
+				}
+			}
+			
+			protected function amtRecivedTxtInput_keyDownHandler(event:KeyboardEvent):void {
+				var amtRec:Number = Number(amtRecivedTxtInput.text);
+				if(amtRec > 0 && purchase.grandTotal > 0) {
+					if(amtRec >= purchase.grandTotal){
+						balanceTxt.text = Number(amtRec - purchase.grandTotal).toString();
+					} else {
+						balanceTxt.text = '0';
+					}
+				} else {
+					balanceTxt.text = '0';
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:VGroup creationComplete="amt_creationCompleteHandler(event)" width="100%"
+			  horizontalAlign="center" paddingBottom="10" paddingTop="10" paddingLeft="10" paddingRight="10" verticalAlign="middle">
+		<mx:VBox styleName="colorBorder" width="100%" paddingBottom="10" paddingTop="10">
+			
+			<!--<s:HGroup width="100%" height="30" verticalAlign="middle" horizontalAlign="right">
+				<mx:Text id="errorText" styleName="" />
+			</s:HGroup>
+			
+			<mx:HRule width="100%" top="0" bottom="0"/>-->
+			
+			<!--<s:HGroup width="100%" height="50" verticalAlign="middle" horizontalAlign="right" >
+				<mx:Text id="balanceReturnTxt" styleName="TotalStyle" text="0"/>
+			</s:HGroup>-->
+			
+			
+			<s:VGroup width="100%" verticalAlign="middle" horizontalAlign="center">
+				
+				<s:HGroup width="100%" horizontalAlign="center">
+					<s:HGroup width="50%" horizontalAlign="right" paddingRight="10">
+						<mx:Label text="Bill type :" styleName="FormlabelStyle"/>
+					</s:HGroup>
+					<s:HGroup width="50%" horizontalAlign="left">
+						<s:RadioButton id="cash" label="Cash" group="{billTypeRBGroup}" value="CASH" selected="true" />
+						<!--<s:RadioButton id="debit" label="Debit" group="{billTypeRBGroup}" value="DEBIT" />-->
+						<s:RadioButton id="card" label="Card" group="{billTypeRBGroup}" value="CARD" />
+					</s:HGroup>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" horizontalAlign="center" id="nameHgroup" includeIn="ShowCustomer">
+					<s:HGroup width="50%" horizontalAlign="right" paddingRight="10">
+						<mx:Label text="Name :" styleName="FormlabelStyle"/>
+					</s:HGroup>
+					<s:HGroup width="50%" horizontalAlign="left">
+						<s:TextInput id="billerNameTxtInput" styleName="TextInputStyle"/>
+					</s:HGroup>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" horizontalAlign="center" includeIn="ShowCustomer">
+					<s:HGroup width="50%" horizontalAlign="right" paddingRight="10">
+						<mx:Label text="Address :" styleName="FormlabelStyle"/>
+					</s:HGroup>
+					<s:HGroup width="50%" horizontalAlign="left">
+						<s:TextInput id="address1TxtInput" styleName="TextInputStyle"/>
+					</s:HGroup>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" horizontalAlign="center" includeIn="ShowCustomer">
+					<s:HGroup width="50%" horizontalAlign="right" paddingRight="10">
+						<mx:Label text="" styleName="FormlabelStyle"/>
+					</s:HGroup>
+					<s:HGroup width="50%" horizontalAlign="left">
+						<s:TextInput id="address2TxtInput" styleName="TextInputStyle"/>
+					</s:HGroup>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" height="100%" horizontalAlign="center" id="phoneHgroup" includeIn="ShowCustomer">
+					<s:HGroup width="50%" horizontalAlign="right" paddingRight="10">
+						<mx:Label text="Phone No :" styleName="FormlabelStyle"/>
+					</s:HGroup>
+					<s:HGroup width="50%" horizontalAlign="left">
+						<s:TextInput id="phoneTxtInput" width="150" styleName="TextInputStyle" restrict="0-9" maxChars="10"/>
+					</s:HGroup>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" height="100%" horizontalAlign="center">
+					<s:HGroup width="50%" horizontalAlign="right" paddingRight="10">
+						<mx:Label text="Sub Total :" styleName="FormlabelStyle" />
+					</s:HGroup>
+					<s:HGroup width="50%" horizontalAlign="left">
+						<mx:Text id="subTotalTxt" styleName="TextStyle" width="150"/>
+					</s:HGroup>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" height="100%" horizontalAlign="center">
+					<s:HGroup width="50%" horizontalAlign="right" paddingRight="10">
+						<mx:Label text="Discount :" styleName="FormlabelStyle"/>
+					</s:HGroup>
+					<s:HGroup width="50%" horizontalAlign="left">
+						<mx:Text id="discountTxt" styleName="TextStyle" width="150"/>
+					</s:HGroup>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" height="100%" horizontalAlign="center">
+					<s:HGroup width="50%" horizontalAlign="right" paddingRight="10">
+						<mx:Label text="Grand Total :" styleName="FormlabelStyle"/>
+					</s:HGroup>
+					<s:HGroup width="50%" horizontalAlign="left">
+						<mx:Text id="grandTotalTxt" styleName="TextStyle" width="150"/>
+					</s:HGroup>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" height="100%" horizontalAlign="center" includeIn="ShowAmtRctEmployee, ShowAmtReceived">
+					<s:HGroup width="50%" horizontalAlign="right" paddingRight="10">
+						<mx:Label text="Amount Recived :" styleName="FormlabelStyle"/>
+					</s:HGroup>
+					<s:HGroup width="50%" horizontalAlign="left" >
+						<s:TextInput id="amtRecivedTxtInput" styleName="TextInputStyle" width="150" restrict="[0-9]."
+									 enter="doneBtn_clickHandler(Constant.BILL_PRINT)" keyUp="amtRecivedTxtInput_keyDownHandler(event)" />
+					</s:HGroup>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" height="100%" horizontalAlign="center" includeIn="ShowAmtRctEmployee, ShowAmtReceived">
+					<s:HGroup width="50%" horizontalAlign="right" paddingRight="10">
+						<mx:Label text="Balance :" styleName="FormlabelStyle"/>
+					</s:HGroup>
+					<s:HGroup width="50%" horizontalAlign="left" >
+						<mx:Text id="balanceTxt" styleName="PicStyle" paddingLeft="3" text="0"/>
+					</s:HGroup>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" height="100%" horizontalAlign="center" includeIn="ShowAmtRctEmployee, ShowEmployee">
+					<s:HGroup width="50%" height="100%" verticalAlign="middle" horizontalAlign="right" paddingRight="10">
+						<mx:Label text="Sales Person :" styleName="FormlabelStyle"/>
+					</s:HGroup>
+					<s:VGroup width="50%" horizontalAlign="left" id="employerHgroup">
+					</s:VGroup>
+				</s:HGroup>
+			</s:VGroup>
+		</mx:VBox>
+		
+		<s:HGroup width="100%" verticalAlign="middle" horizontalAlign="right" >
+			<!--<s:Button id="noPrintBtn" label="No Print" width="100" height="30" styleName="DefaultButton" useHandCursor="true" buttonMode="true"
+					  click="doneBtn_clickHandler(Constant.BILL_SAVE)"/> -->
+			
+			<s:Button id="done" label="Print" width="100" height="30" styleName="DefaultButton" useHandCursor="true" buttonMode="true"
+					  click="doneBtn_clickHandler(Constant.BILL_PRINT)" keyDown="done_keyDownHandler(event)"/>
+		</s:HGroup>
+	</s:VGroup>
+</s:TitleWindow>

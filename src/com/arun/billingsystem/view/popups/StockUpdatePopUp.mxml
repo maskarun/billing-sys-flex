@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 width="100%" height="100%" title="Stock Update"
+		 styleName="panelStyle"
+		 backgroundColor="#f7f8f5"
+		 close="cancelBtn_clickHandler()">
+	<s:states>
+		<mx:State name="ShowNext" />
+		<mx:State name="DontShowNext" />
+	</s:states>
+	<fx:Script>
+		<![CDATA[
+			import com.arun.billingsystem.common.Constant;
+			import com.arun.billingsystem.common.ErrorConstant;
+			import com.arun.billingsystem.domain.Stock;
+			import com.arun.billingsystem.event.RootEvent;
+			import com.arun.billingsystem.util.StringUtil;
+			
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+
+			
+			[Dispatcher]public var dispatch:IEventDispatcher;
+			
+			private static var stock:Stock
+			
+			public static function show(selectedStock:Stock):void {
+				if(selectedStock != null){
+					stock = selectedStock;
+					var stockupdatePopUp:StockUpdatePopUp = new StockUpdatePopUp();
+					stockupdatePopUp.showPopUp();
+				}
+			}
+			
+			public function showPopUp():void {
+				PopUpManager.addPopUp(this, FlexGlobals.topLevelApplication.document, true);
+				PopUpManager.centerPopUp(this);
+			}
+			
+			protected function cancelBtn_clickHandler():void {
+				var rootEvent:RootEvent = new RootEvent(RootEvent.EVENT_STOCK_CONFIRMATION);
+				rootEvent.popUpType = Constant.STOCK_CLOSED;
+				dispatch.dispatchEvent(rootEvent);
+				PopUpManager.removePopUp(this);
+			}
+			
+			protected function updateStockBtn_clickHandler():void
+			{
+				if(checkComplusoryField()){
+					stock.itemName = itemNameTxtInput.text;
+					stock.soldPrice = Number(soldRateTxtInput.text);
+					stock.discount = Number(discountTxtInput.text);
+					stock.demage = Number(demageTxtInput.text);
+					stock.status = statusCmbBox.selectedItem;
+					stock.noOfPrint = Number(noOfPrintTxtInput.text);
+					var rootEvent:RootEvent = new RootEvent(RootEvent.EVENT_STOCK_CONFIRMATION);
+					rootEvent.popUpType = Constant.STOCK_UPDATE;
+					rootEvent.stock = stock;
+					dispatch.dispatchEvent(rootEvent);
+					PopUpManager.removePopUp(this);
+				} else {
+					ShowAlert.show(ErrorConstant.ERROR_135, Constant.POP_UP, Constant.SHOW_IMG_WAR);
+				}
+			}
+			
+			public function checkComplusoryField():Boolean {
+				var isSuccess:Boolean = false;
+				var itemName:String = itemNameTxtInput.text;
+				var soldRate:Number = Number(soldRateTxtInput.text);
+				var discount:int = Number(discountTxtInput.text);
+				var demage:int = Number(demageTxtInput.text);
+				
+				if(itemName == "" && itemName == null){
+					ShowAlert.show(ErrorConstant.ERROR_121, Constant.POP_UP, Constant.SHOW_IMG_WAR);
+					return isSuccess;
+				}
+				
+				if(soldRate == 0 || soldRate <= 0){
+					ShowAlert.show(ErrorConstant.ERROR_137, Constant.POP_UP, Constant.SHOW_IMG_WAR);
+					return isSuccess;
+				}
+				
+//				if(discount <= 0 || demage <= 0){
+//					ShowAlert.show(ErrorConstant.ERROR_135, Constant.POP_UP, Constant.SHOW_IMG_WAR);
+//					return isSuccess;
+//				}
+				
+				return isSuccess = true;
+			}
+			public function statusCmbBox_focusOutHandler():void
+			{
+				var status:String = statusCmbBox.selectedItem;
+				if(!StringUtil.contains(Constant.STOCK_STATUS_ARR, status)){
+					statusCmbBox.selectedIndex = 0;
+					ShowAlert.show(ErrorConstant.ERROR_102, Constant.POP_UP, Constant.SHOW_IMG_WAR);
+				}
+			}
+			
+			protected function nextBtn_clickHandler():void {
+				if(checkComplusoryField()){
+					salesHbox.enabled = false;
+					currentState = "DontShowNext";
+					itemNamePrintTxt.text = stock.itemName;
+					noOfPrintTxtInput.setFocus();
+				}
+			}
+			
+			protected function backBtn_clickHandler():void {
+				salesHbox.enabled = true;
+				currentState = "ShowNext";
+			}
+			
+			protected function stockupdate_creationCompleteHandler():void {
+				if(stock != null){
+					itemCodeTxt.text = stock.itemCode;
+					categoryTxt.text = stock.category;
+					totalPicsTxt.text = stock.purchaseQty.toString();
+					itemNameTxtInput.text = stock.itemName;
+					purchaseRateTxt.text = stock.purchasePrice.toString();
+					sizeTxt.text = stock.size.toString();
+					soldRateTxtInput.text = stock.soldPrice.toString();
+					discountTxtInput.text = stock.discount.toString();
+					demageTxtInput.text = stock.demage.toString();
+					statusCmbBox.selectedItem = stock.status;
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:VGroup width="100%" height="100%" verticalAlign="middle" paddingLeft="10" paddingRight="10" paddingTop="10" 
+			  creationComplete="stockupdate_creationCompleteHandler()">
+		<mx:HBox width="100%" horizontalAlign="center" styleName="colorBorder" paddingTop="10" paddingBottom="10" 
+				 paddingRight="10">
+			<s:VGroup width="150" height="100%" horizontalAlign="right">
+				<mx:Label text="Item Code :" styleName="FormlabelStyle"/>
+				<mx:Label text="Purchase Rate :" styleName="FormlabelStyle"/>
+				<mx:Label text="Size :" styleName="FormlabelStyle"/>
+			</s:VGroup>
+			<s:VGroup height="100%" width="160">
+				<mx:Text id="itemCodeTxt" styleName="TextStyle"/>
+				<mx:Text id="purchaseRateTxt" styleName="TextStyle" text=""/>
+				<mx:Text id="sizeTxt" styleName="TextStyle" text="0"/>
+				
+			</s:VGroup>
+			<s:VGroup width="150" height="100%" horizontalAlign="right">
+				<mx:Label text="Category :" styleName="FormlabelStyle"/>
+				<mx:Label text="Purchase Pics :" styleName="FormlabelStyle"/>
+			</s:VGroup>
+			<s:VGroup height="100%" width="160">
+				<mx:Text id="categoryTxt" styleName="TextStyle"/>
+				<mx:Text id="totalPicsTxt" styleName="TextStyle"/>
+			</s:VGroup>
+		</mx:HBox>
+		
+		<mx:HBox width="100%" horizontalAlign="center" styleName="colorBorder" paddingTop="10" paddingBottom="10" 
+				 paddingRight="10" id="salesHbox">	
+			<s:VGroup  height="100%" horizontalAlign="right" width="150">
+				<mx:Label text="Item Name :" styleName="FormlabelStyle"/>
+				<mx:Label text="Discount :" styleName="FormlabelStyle"/>
+				<mx:Label text="Status :" styleName="FormlabelStyle"/>
+			</s:VGroup>
+			<s:VGroup height="100%" width="160">
+				<s:TextInput id="itemNameTxtInput" width="160" styleName="TextInputStyle" tabIndex="7" />
+				<s:TextInput id="discountTxtInput" width="160" restrict="0-9" styleName="TextInputStyle" tabIndex="3"/>
+				<s:ComboBox id="statusCmbBox" width="160" styleName="ComboBoxStyle" prompt="Select" 
+							focusOut="statusCmbBox_focusOutHandler()" dataProvider="{Constant.STOCK_STATUS_ARR}"/>
+			</s:VGroup>
+			<s:VGroup height="100%" horizontalAlign="right" width="150">
+				<mx:Label text="Sale Price :" styleName="FormlabelStyle"/>
+				<mx:Label text="Demage :" styleName="FormlabelStyle"/>
+			</s:VGroup>
+			<s:VGroup height="100%" width="160">
+				<s:TextInput id="soldRateTxtInput" width="160" restrict="0-9" styleName="TextInputStyle" tabIndex="8"/>
+				<s:TextInput id="demageTxtInput" width="160" restrict="0-9" styleName="TextInputStyle" tabIndex="6"/>
+			</s:VGroup>
+		</mx:HBox>
+		
+		<mx:HBox width="100%" horizontalAlign="center" styleName="colorBorder"
+				 paddingTop="10" paddingBottom="10" paddingRight="10" includeIn="DontShowNext">
+			<s:VGroup width="150" height="100%" horizontalAlign="right" gap="12">
+				<mx:Label text="Item Name :" styleName="FormlabelStyle"/>
+			</s:VGroup>
+			<s:VGroup height="100%" width="160">
+				<mx:Text styleName="TextStyle" id="itemNamePrintTxt"/>
+			</s:VGroup>
+			
+			<s:VGroup width="150" height="100%" horizontalAlign="right" gap="12">
+				<mx:Label text="No Of Print :" styleName="FormlabelStyle"/>
+			</s:VGroup>
+			<s:VGroup height="100%" width="160">
+				<s:TextInput id="noOfPrintTxtInput" width="160" restrict="0-9" styleName="TextInputStyle" tabIndex="9"/>
+			</s:VGroup>
+		</mx:HBox>
+		<s:HGroup width="100%" horizontalAlign="right" verticalAlign="middle" paddingBottom="10" paddingTop="10" includeIn="ShowNext">
+			<mx:LinkButton icon="@Embed('./images/icon/next_32.png')" label="Next" useHandCursor="true" buttonMode="true" click="nextBtn_clickHandler()"/>
+		</s:HGroup>
+		<s:HGroup width="100%" paddingBottom="10" paddingTop="10" includeIn="DontShowNext">
+			<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+				<mx:LinkButton icon="@Embed('./images/icon/back_32.png')" label="Back" useHandCursor="true" buttonMode="true" click="backBtn_clickHandler()"/>
+			</s:HGroup>
+			<s:HGroup width="100%" horizontalAlign="right" verticalAlign="middle">
+				<mx:LinkButton icon="@Embed('./images/icon/updateBill_32.png')" label="Update Stock" useHandCursor="true" buttonMode="true" click="updateStockBtn_clickHandler()"/>
+			</s:HGroup>	
+		</s:HGroup>
+		
+	</s:VGroup>
+</s:TitleWindow>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 width="100%" height="100%">
+	<fx:Script>
+		<![CDATA[
+			import com.arun.billingsystem.common.Constant;
+			
+			private function tree_labelFunc(item:Object):String {
+				var suffix:String = "";
+				if (tree.dataDescriptor.hasChildren(item)) {
+					suffix = " (" + item.children.length + ")";
+				}
+				return item.name.toUpperCase() + suffix;
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		
+	<fx:Array id="arr">
+		<fx:Object name="One">
+			<fx:children>
+				<fx:Array>
+					<fx:Object name="Two" />
+					<fx:Object name="Three" />
+					<fx:Object name="Four">
+						<fx:children>
+							<fx:Array>
+								<fx:Object name="Five" />
+								<fx:Object name="Six" />
+							</fx:Array>
+						</fx:children>
+					</fx:Object>
+					<fx:Object name="Seven">
+						<fx:children>
+							<fx:Array>
+								<fx:Object name="Eight" />
+							</fx:Array>
+						</fx:children>
+					</fx:Object>
+					<fx:Object name="Nine" />
+				</fx:Array>
+			</fx:children>
+		</fx:Object>
+	</fx:Array>
+		
+	</fx:Declarations>
+	<mx:VBox width="100%" height="100%">
+		<s:BorderContainer width="100%" height="30" styleName="panelStyle">
+			<mx:VBox width="100%">
+				<mx:HBox width="100%" height="100%" paddingTop="12" paddingLeft="5">
+					<s:Label text="{Constant.MENU_VIDEO}" color="0x4b4b4b" fontSize="15" fontWeight="bold" />
+				</mx:HBox>
+				<mx:HRule width="100%" top="0" bottom="0"/>
+			</mx:VBox>
+		</s:BorderContainer>
+		<mx:HBox width="100%" height="100%">
+			<mx:VBox width="25%" height="100%">
+				<mx:Tree width="100%" height="100%" id="tree"
+						 dataProvider="{arr}"
+						 labelFunction="tree_labelFunc">
+				</mx:Tree>
+			</mx:VBox>
+			<mx:VBox width="75%" height="100%">
+				<s:VideoPlayer width="100%" height="100%" 
+							   source="C:/Users/Public/Videos/Sample Videos/Wildlife.wmv"
+							   autoPlay="true"/>
+			</mx:VBox>
+		</mx:HBox>
+	</mx:VBox>
+</s:Group>

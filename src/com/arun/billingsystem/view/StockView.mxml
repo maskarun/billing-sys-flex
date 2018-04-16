@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%">
+	<s:states>
+		<s:State name="dontShowFilter" />
+		<s:State name="showFilter" />
+	</s:states>
+	<fx:Script>
+		<![CDATA[
+			import com.arun.billingsystem.common.Constant;
+			import com.arun.billingsystem.model.presentation.StockPresentation;
+			import com.arun.billingsystem.util.FormatUtil;
+			
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			[Inject(source="stockPresentation")]
+			public var stockPresentation:StockPresentation;
+						
+		]]>
+	</fx:Script>
+	<mx:VBox width="100%" height="100%" creationComplete="stockPresentation.stockView_creationCompleteHandler()">
+		<s:BorderContainer width="100%" height="30" styleName="panelStyle">
+			<mx:VBox width="100%">
+				<mx:HBox width="100%" height="100%">
+					<mx:HBox width="100%" paddingTop="12" paddingLeft="5">
+						<mx:LinkButton icon="@Embed('./images/icon/addstock_32.png')" id="addButton" label="Add Stock"
+								  click="stockPresentation.stockAdd_clickHandler()"/>
+						<mx:VRule height="30" />
+						<mx:LinkButton icon="@Embed('./images/icon/search_32.png')" label="Search"
+									   click="stockPresentation.stockViewSearch_hander()"/>
+					</mx:HBox>
+				</mx:HBox>
+				<mx:HRule width="100%"/>
+			</mx:VBox>
+		</s:BorderContainer>
+
+		<s:VGroup width="100%" height="100%" paddingTop="15" paddingBottom="5" paddingLeft="5" paddingRight="5">
+			<s:VGroup width="100%" verticalAlign="middle">
+				<s:HGroup width="100%" height="40" includeIn="showFilter">
+					<s:HGroup height="100%" verticalAlign="middle">
+						<mx:Label text="Item Code : " styleName="FormlabelStyle" width="100%"/>
+						<s:TextInput id="itemCodeTxtInput" width="160" styleName="TextInputStyle" tabIndex="1" restrict="[0-9]" 
+									 change="stockPresentation.stockViewFilter_hander()" />
+					</s:HGroup>
+					<s:HGroup height="100%" verticalAlign="middle">
+						<mx:Label text="Category : " styleName="FormlabelStyle"/>
+						<s:ComboBox id="categoryCmbBox" width="160" styleName="ComboBoxStyle" prompt="Select" tabIndex="2"
+									change="stockPresentation.stockViewFilter_hander()" />
+					</s:HGroup>
+					<s:HGroup height="100%" verticalAlign="middle">
+						<mx:Label text="Purchase Name : " styleName="FormlabelStyle"/>
+						<s:TextInput id="purchaseNameTxtInput" width="160" styleName="TextInputStyle" tabIndex="3"
+									change="stockPresentation.stockViewFilter_hander()" />
+					</s:HGroup>
+					<s:HGroup height="100%" verticalAlign="middle">
+						<mx:Label text="Item Name : " styleName="FormlabelStyle"/>
+						<s:TextInput id="itemNameTxtInput" width="160" styleName="TextInputStyle" tabIndex="4"
+									 change="stockPresentation.stockViewFilter_hander()" />
+					</s:HGroup>
+					<s:HGroup height="100%" verticalAlign="middle">
+						<s:Button id="resetButton" label="Reset" width="100" tabIndex="5" styleName="DefaultButton"
+								  click="stockPresentation.reset()"/>
+					</s:HGroup>
+				</s:HGroup>
+				<mx:HBox width="100%" height="80" verticalAlign="middle" horizontalAlign="center"
+						 styleName="colorBorder" paddingBottom="5" includeIn="showFilter">
+					<!--<s:VGroup width="30%" height="100%" horizontalAlign="center" verticalAlign="middle" id="addVgroup">
+						<mx:Label text="Purchase Name : " styleName="FormlabelStyle"/>
+						<mx:Text id="purchaseNameTxt" styleName="ViewStatusStyle" />
+					</s:VGroup>-->
+					<s:VGroup width="30%" height="100%" horizontalAlign="center" verticalAlign="middle">
+						<mx:Label text="Purchase Quantity : " styleName="FormlabelStyle"/>
+						<mx:Text id="purchaseQtyTxt" styleName="ViewStatusStyle" text="0" />
+					</s:VGroup>
+					<s:VGroup width="30%" height="100%" horizontalAlign="center" verticalAlign="middle">
+						<mx:Label text="Sold Quantity: " styleName="FormlabelStyle"/>
+						<mx:Text id="soldQtyTxt" styleName="ViewStatusStyle" text="0" />
+					</s:VGroup>
+					<s:VGroup width="30%" height="100%" horizontalAlign="center" verticalAlign="middle">
+						<mx:Label text="Demage : " styleName="FormlabelStyle"/>
+						<mx:Text id="demageTxt" styleName="ViewStatusStyle" text="0" />
+					</s:VGroup>
+				</mx:HBox>
+			</s:VGroup>
+			
+			<mx:DataGrid width="100%" height="100%" id="stockDataGrid" focusEnabled="false" rowCount="1" horizontalScrollPolicy="off"
+						 verticalScrollPolicy="auto" styleName="CustomDataGrid" itemClick="stockPresentation.stockDataGrid_itemClickHandler(event)">
+				<mx:columns>
+					<!--<mx:DataGridColumn headerText="Select" width="50" headerStyleName="dataGridHeaderStyle">
+						<mx:itemRenderer>
+							<fx:Component>
+								<mx:HBox horizontalAlign="center" verticalAlign="middle">
+									<s:CheckBox id="selectChkBox" selected="{data.isCheckBoxSelected=selectChkBox.selected}" />                                   
+								</mx:HBox>
+							</fx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>-->
+					
+					<mx:DataGridColumn dataField="itemCode" headerText="Item Code" textAlign="center" minWidth="120" 
+									   headerStyleName="dataGridHeaderStyle" />
+					<mx:DataGridColumn dataField="purchaseName" headerText="Purchase Name" textAlign="center" minWidth="120" 
+									   headerStyleName="dataGridHeaderStyle" />
+					<!--<mx:DataGridColumn dataField="category" headerText="Category" minWidth="120"
+									   headerStyleName="dataGridHeaderStyle" />-->
+					<mx:DataGridColumn dataField="itemName" headerText="Item Name" minWidth="150"
+									   headerStyleName="dataGridHeaderStyle" />
+					<!--<mx:DataGridColumn dataField="size" headerText="Size" textAlign="center"
+									   headerStyleName="dataGridHeaderStyle" />-->
+					<mx:DataGridColumn dataField="purchasePrice" headerText="Purchase's Price" textAlign="right" labelFunction="{FormatUtil.myLabelFunction}"
+									   headerStyleName="dataGridHeaderStyle" />
+					<mx:DataGridColumn dataField="soldPrice" headerText="Sale's Price" textAlign="right" labelFunction="{FormatUtil.myLabelFunction}"
+									   headerStyleName="dataGridHeaderStyle" />
+					<mx:DataGridColumn dataField="purchaseQty" headerText="Purchase Quantity" textAlign="center" 
+									   headerStyleName="dataGridHeaderStyle" /> 
+					<mx:DataGridColumn dataField="soldQuantity" headerText="Sold Quantity" textAlign="center" 
+									   headerStyleName="dataGridHeaderStyle" />
+					<!--<mx:DataGridColumn dataField="totalAmount" headerText="Total Amount" textAlign="right" labelFunction="{FormatUtil.myLabelFunction}" 
+									   headerStyleName="dataGridHeaderStyle" />-->
+					<mx:DataGridColumn dataField="discount" headerText="Discount %" textAlign="right" 
+									   headerStyleName="dataGridHeaderStyle" />
+					<mx:DataGridColumn dataField="demage" headerText="Demage" textAlign="center" 
+									   headerStyleName="dataGridHeaderStyle" />
+					<mx:DataGridColumn dataField="status" headerText="Status" textAlign="center"
+									   headerStyleName="dataGridHeaderStyle" />
+				</mx:columns>
+			</mx:DataGrid>
+		</s:VGroup>
+	</mx:VBox>
+</s:Group>

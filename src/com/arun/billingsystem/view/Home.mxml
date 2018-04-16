@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%" 
+		 xmlns:view="com.arun.billingsystem.view.*"
+		 creationComplete="homePresentation.home_creationCompleteHandler()" xmlns:util="com.arun.billingsystem.util.*">
+	<fx:Script>
+		<![CDATA[
+			import com.arun.billingsystem.model.UserModel;
+			import com.arun.billingsystem.model.presentation.HomePresentation;
+			import com.arun.billingsystem.view.popups.SettingPopUp;
+			
+			[Inject(source="homePresentation")]
+			public var homePresentation:HomePresentation;
+			[Inject(source="userModel")]
+			public var userModel:UserModel;
+			
+			protected function setting_clickHandler(event:MouseEvent):void
+			{
+				SettingPopUp.show(userModel.loadApp);
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<mx:VBox width="100%" height="100%">
+		<mx:HBox width="100%" backgroundColor="#e1e1e1">
+			<mx:ApplicationControlBar width="100%" height="50" dock="true">
+				<s:ButtonBar id="mainMenuBar" height="100%" useHandCursor="true" buttonMode="true" skinClass="skins.CustomButtonBarSkin" 
+							 click="homePresentation.mainMenuBar_clickHandler()" selectedIndex="0"/>
+				<s:HGroup horizontalAlign="right" width="100%" height="100%" verticalAlign="middle">
+					<util:MyWatch formatString="DD-MM-YYYY KK:NN:SS" />
+					<mx:Label id="fullNameText" styleName="FormlabelStyle" fontWeight="bold" fontSize="15" />
+					<mx:Label id="logOut" selectable="true" text="Sign Out" useHandCursor="true" buttonMode="true" mouseChildren="false" paddingRight="5"
+							  styleName="linkMouseOut" mouseOver="{logOut.styleName='linkMouseOver'}" mouseOut="{logOut.styleName='linkMouseOut'}" 
+							  click="homePresentation.logOut_clickHandler()"/>
+					<s:Image source="@Embed('./images/icon/setting_28.png')" id="setting" useHandCursor="true" buttonMode="true"
+								   click="setting_clickHandler(event)"/>
+				</s:HGroup>
+			</mx:ApplicationControlBar>
+		</mx:HBox>
+		<mx:HBox width="100%" height="100%" paddingLeft="5" paddingRight="5" paddingBottom="5">
+			<mx:VBox width="100%" height="100%" styleName="vboxBorder">
+				<mx:ViewStack id="homeViewStack" width="100%" height="100%">
+					<s:NavigatorContent width="100%" height="100%"><view:TabBilling id="tabBillingView"/></s:NavigatorContent>
+					<s:NavigatorContent width="100%" height="100%"><view:ViewBilling id="viewBilling"/></s:NavigatorContent>
+					<s:NavigatorContent width="100%" height="100%"><view:StockView id="stockView"/></s:NavigatorContent>
+					<s:NavigatorContent width="100%" height="100%"><view:ReportView id="searchView"/></s:NavigatorContent>
+					<s:NavigatorContent width="100%" height="100%"><view:Video id="video"/></s:NavigatorContent>
+				</mx:ViewStack>
+			</mx:VBox>
+		</mx:HBox>
+	</mx:VBox>
+</s:Group>

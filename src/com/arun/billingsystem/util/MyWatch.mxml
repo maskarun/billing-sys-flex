@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" creationComplete="init()">
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			[Bindable]public var curTime:String;
+			[Bindable]public var formatString:String;
+			
+			protected function init():void
+			{
+				curTime = format.format(new Date()).toString();
+				var mytimer:Timer = new Timer(1000, 0);
+				mytimer.addEventListener("timer", timeHandler);
+				mytimer.start();
+			}
+			
+			public function timeHandler(event:TimerEvent):void {
+				curTime = format.format(new Date()).toString();
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<mx:DateFormatter formatString="{formatString}" id="format" />
+	</fx:Declarations>
+	<s:Label id="lbltime" text="{curTime}" />
+</mx:Canvas>

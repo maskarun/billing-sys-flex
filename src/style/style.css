@@ -1,0 +1,200 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+
+global{
+	fontFamily:Arial; 
+	fontSize:13; 
+	modalTransparencyBlur: 0;
+	modalTransparency: 0;
+	modalTransparencyColor: #ffffff;
+	focusColor:#FFA100;
+	verticalScrollBarStyleName:VScrollBarStyles;
+	horizontalScrollBarStyleName:VScrollBarStyles;
+	content-background-alpha: 0.99;
+	/*symbol-color: #DDDDDD; */
+}
+
+.CancelStyle
+{
+	fontSize:13;
+	fontWeight:bold;
+	color:red;
+}
+
+.UpdatedStyle
+{
+	fontSize:13;
+	fontWeight:bold;
+	color:#ffa100;
+}
+
+.FormlabelStyle
+{
+	fontSize:13;
+	fontWeight:normal;
+	color:#4b4b4b;
+}
+.stocklabelStyle
+{
+	fontSize:15;
+	fontWeight:bold;
+	color:green;
+}
+.TextStyle
+{
+	fontSize:13;
+	fontWeight:bold;
+	color:#00b2ef;
+}
+.BalanceStyle
+{
+	fontSize:12;
+	fontWeight:bold;
+	color:#00b2ef;
+}
+.GrandTotalStyle
+{
+	fontSize:70;
+	fontWeight:bold;
+	color:green;
+	textAlign:right;
+}
+.ViewGrandTotalStyle
+{
+	fontSize:35;
+	fontWeight:bold;
+	color:green;
+}
+.ViewStatusStyle
+{
+	fontSize:25;
+	fontWeight:bold;
+	color:green;
+}
+.TotalStyle
+{
+	fontSize:40;
+	fontWeight:bold;
+	color:green;
+	textAlign:right;
+}
+.PicStyle
+{
+	fontSize:38;
+	fontWeight:bold;
+	color:#ffa100;
+	textAlign:right;
+}
+.ErrorStyle
+{
+	color:#FFFFFF;
+	fontSize:9;
+	fontWeight:bold;
+	shadowColor:#000000;
+	borderColor:#FF0000;
+	borderStyle:"errorTipRight";
+	paddingBottom: 4;
+	paddingLeft: 4;
+	paddingRight: 4;
+	paddingRight: 4;
+}
+.TextInputStyle
+{
+	skinClass:ClassReference("skins.CustomTextInput")
+}
+.ComboBoxStyle
+{
+	skinClass:ClassReference("skins.CustomComboBoxSkin")
+}
+.DefaultButton
+{
+	skinClass:ClassReference("skins.CustomButtonSkin");
+}
+.DefaultGoldButton
+{
+	skinClass:ClassReference("skins.CustomGoldButtonSkin");
+}
+.padd10
+{
+	paddingBottom:10px;
+	paddingTop:10px;
+	paddingLeft:10px;
+	paddingRight:10px;
+}
+.padd5
+{
+	paddingBottom:5px;
+	paddingTop:5px;
+	paddingLeft:5px;
+	paddingRight:5px;
+}
+.panelStyle
+{
+	backgroundImage:Embed(source='./images/header.png');
+	left:10;
+	right:0;
+	color:#161616;
+	fontSize: 14;
+	borderVisible:false;
+}
+.vboxBorder{
+	borderVisible:true;
+	borderThickness:2;
+	borderWeight:2;
+	borderStyle:solid;
+	borderColor:#e1e1e1;
+	backgroundColor:#f7f8f5;
+}
+.colorBorder{
+	borderVisible:true;
+	borderThickness:10;
+	borderWeight:10;
+	borderStyle:solid;
+	borderColor:#00b2ef;
+	backgroundColor:#f7f8f5;
+}
+.CustomDataGrid
+{
+	headerColors:#e1e1e1, #e1e1e1;
+	color:#161616;
+	borderColor:#d4d4d4;
+	verticalGridLineColor:#d5d5d5;
+	horizontalGridLineColor:#d5d5d5;
+	selectionColor:#dbdbdb;
+	rollOverColor:#ebf6fc;
+}
+.dataGridHeaderStyle
+{
+	textAlign:center;
+	fontWeight:bold;
+	color:#4b4b4b;
+}
+.linkMouseOver {
+	font-size:15;
+	color:#4b4b4b;
+	text-decoration:underline;
+	font-weight:bold;
+}
+.linkMouseOut {
+	font-size:15;
+	color:#00b2ef;
+	text-decoration:none;
+	font-weight:bold;
+}
+.myTabs {
+	color:#FFFFFF;
+	font-weight:bold;
+	background-color:#6495ED;
+	cornerRadius: 8;
+}
+.myTextTabs {
+	color:#8B0000;
+	background-color:#97FFFF;
+	font-weight:bold;
+}
+.RuleStyle
+{
+	color:#00b2ef;
+	borderThickness: 5px;
+}

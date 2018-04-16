@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="SalesReport" pageWidth="210" pageHeight="750" columnWidth="206" leftMargin="2" rightMargin="2" topMargin="0" bottomMargin="10" isFloatColumnFooter="true" whenResourceMissingType="Key" isIgnorePagination="true" uuid="be9306a4-69af-4724-9d98-91de9accb45f">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["C:\\Users\\Arun\\"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="path" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<field name="totalAmt" class="java.lang.Double">
+		<fieldDescription><![CDATA[grandTotal]]></fieldDescription>
+	</field>
+	<field name="date" class="java.lang.String">
+		<fieldDescription><![CDATA[date]]></fieldDescription>
+	</field>
+	<field name="totalQty" class="java.lang.Integer">
+		<fieldDescription><![CDATA[totalQty]]></fieldDescription>
+	</field>
+	<field name="purchase" class="java.util.List">
+		<fieldDescription><![CDATA[purchase]]></fieldDescription>
+	</field>
+	<field name="grandTotal" class="java.lang.Double"/>
+	<title>
+		<band height="81" splitType="Stretch">
+			<line>
+				<reportElement uuid="90716796-82d4-4a1b-9621-6e84c708cf75" x="0" y="78" width="206" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement uuid="9bd6cc03-c1c3-4c4f-9178-94ccbb68300e" x="0" y="0" width="206" height="32"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Algerian" size="14" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[MUMMY DADDY READYMADES]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="67c925cb-1ed1-4225-a9d4-42cc7af0c59c" x="0" y="31" width="206" height="11"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[WHOLESALES & RETAIL MERCHANT]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="debe9206-bd0d-40d3-b542-79e7d24db0a4" x="0" y="41" width="206" height="11"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[	Main Road, BARUGUR - 635 104, Krishnagiri]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="b4afabea-54a0-4101-ad33-df35cdd55df5" x="126" y="51" width="80" height="13"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[PH: 7639219888  ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="623926f0-62e8-4286-9e86-b50df3a84d6d" x="1" y="63" width="59" height="14"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[Sales Date : ]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="eaba5b85-0cec-41f1-8643-0c7b49cc5f2a" x="61" y="63" width="144" height="14"/>
+				<textElement verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{date}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<subreport isUsingCache="true">
+				<reportElement uuid="5fb3d5d9-6cff-4578-a5a6-43c2179d2c22" x="1" y="0" width="205" height="15"/>
+				<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($F{purchase})]]></dataSourceExpression>
+				<subreportExpression><![CDATA[$P{path}+"SalesReport_subreport.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="64" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="98d9e1fa-619b-4c85-8d42-157b2c3d9cfd" x="80" y="4" width="59" height="15"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Grand Total : ]]></text>
+			</staticText>
+			<line>
+				<reportElement uuid="748bcf6e-7ee3-467c-b1f4-133ce3720175" x="0" y="2" width="206" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<textField>
+				<reportElement uuid="ef5a89d4-3100-4c91-8ab9-2dc3b96428ef" x="85" y="27" width="120" height="16"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{totalQty}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="f0b5c372-0752-43e8-9019-8c27b0a96cff" x="22" y="27" width="63" height="16"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Total Pics : ]]></text>
+			</staticText>
+			<line>
+				<reportElement uuid="8e6e228d-f888-4272-924a-98b08f827553" x="80" y="20" width="125" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement uuid="0be9bbca-fb3e-498a-af51-3603515f0021" x="1" y="43" width="84" height="20"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Total Amount : ]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="c341eedd-b059-427a-9f41-1727863317df" x="139" y="4" width="66" height="15"/>
+				<textElement verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{grandTotal}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="372be06f-765f-47ff-87bf-daf7162a7007" x="85" y="43" width="120" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{grandTotal}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnFooter>
+</jasperReport>
