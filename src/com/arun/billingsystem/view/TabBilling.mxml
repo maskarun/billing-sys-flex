@@ -16,7 +16,7 @@
 			[Inject(source="tabBillingPresentation")]
 			public var tabBillingPresentation:TabBillingPresentation;
 			
-			[Bindable][Embed(source="images/Save.png")]
+			[Bindable][Embed(source="/images/Save.png")]
 			private var saveIcon:Class;
 			
 			protected function tabBilling_creationCompleteHandler(event:FlexEvent):void
@@ -30,16 +30,16 @@
 		<s:BorderContainer width="100%" styleName="panelStyle">
 			<s:HGroup width="100%" paddingTop="12">
 				<s:HGroup width="100%" paddingLeft="5" paddingRight="5">
-					<mx:LinkButton icon="@Embed('./images/icon/newTab_32.png')" id="newBill" tabIndex="-1" label="New [F1]" height="30" useHandCursor="true" buttonMode="true" 
+					<mx:LinkButton icon="@Embed('/images/icon/newTab_32.png')" id="newBill" tabIndex="-1" label="New [F1]" height="30" useHandCursor="true" buttonMode="true" 
 							  click="tabBillingPresentation.newBill_clickHandler()"/>
 					<mx:VRule height="30" />
-					<mx:LinkButton icon="@Embed('./images/icon/clearBill_32.png')" id="clearBill" tabIndex="-1" label="Clear [F2]" height="30" useHandCursor="true" buttonMode="true"
+					<mx:LinkButton icon="@Embed('/images/icon/clearBill_32.png')" id="clearBill" tabIndex="-1" label="Clear [F2]" height="30" useHandCursor="true" buttonMode="true"
 							  click="tabBillingPresentation.clear_clickHandler()"/>
 					<mx:VRule height="30" />
-					<mx:LinkButton icon="@Embed('./images/icon/delete_24.png')" id="closeTabBtn" tabIndex="-1" label="Delete [F3]" height="30" buttonMode="true" useHandCursor="true"
+					<mx:LinkButton icon="@Embed('/images/icon/delete_24.png')" id="closeTabBtn" tabIndex="-1" label="Delete [F3]" height="30" buttonMode="true" useHandCursor="true"
 							  click="tabBillingPresentation.shortcut_removeTabBilling()"/>
 					<mx:VRule height="30" />
-					<mx:LinkButton icon="@Embed('./images/icon/save_32.png')" id="saveTabBtn" tabIndex="-1" label="Save [F4]" height="30" buttonMode="true" useHandCursor="true"
+					<mx:LinkButton icon="@Embed('/images/icon/save_32.png')" id="saveTabBtn" tabIndex="-1" label="Save [F4]" height="30" buttonMode="true" useHandCursor="true"
 							 click="tabBillingPresentation.saveBill_clickHandler(Constant.BILL_STATUS_CLOSED)"/>
 				</s:HGroup>
 				<!--<s:HGroup height="100%" horizontalAlign="right" gap="20" paddingRight="30" verticalAlign="middle">

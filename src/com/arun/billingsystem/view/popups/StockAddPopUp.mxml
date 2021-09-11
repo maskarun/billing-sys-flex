@@ -331,7 +331,7 @@
 		</mx:HBox>
 		
 		<s:HGroup width="100%" horizontalAlign="right" verticalAlign="middle">
-			<mx:LinkButton icon="@Embed('./images/icon/add_32.png')" label="Add" useHandCursor="true" buttonMode="true" click="addSizeBtn_clickHandler()"/>
+			<mx:LinkButton icon="@Embed('/images/icon/add_32.png')" label="Add" useHandCursor="true" buttonMode="true" click="addSizeBtn_clickHandler()"/>
 		</s:HGroup>
 		
 		<mx:HBox width="100%" horizontalAlign="center" styleName="colorBorder"
@@ -342,7 +342,7 @@
 		
 		<s:HGroup width="100%" paddingBottom="10" paddingTop="10">
 			<s:HGroup width="100%" horizontalAlign="right" verticalAlign="middle">
-				<mx:LinkButton icon="@Embed('./images/icon/addstock1_32.png')" label="Add Stock" useHandCursor="true" buttonMode="true" click="addStockBtn_clickHandler()"/>
+				<mx:LinkButton icon="@Embed('/images/icon/addstock1_32.png')" label="Add Stock" useHandCursor="true" buttonMode="true" click="addStockBtn_clickHandler()"/>
 			</s:HGroup>	
 		</s:HGroup>
 	</s:VGroup>

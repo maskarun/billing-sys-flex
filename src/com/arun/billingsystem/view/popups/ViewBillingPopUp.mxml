@@ -123,10 +123,10 @@
 		<s:VGroup width="100%">
 			
 			<s:HGroup width="100%" verticalAlign="middle" horizontalAlign="right">
-				<mx:LinkButton icon="@Embed('./images/icon/updateBill_32.png')" id="updateBill" label="Update Bill" useHandCursor="true" buttonMode="true" 
+				<mx:LinkButton icon="@Embed('/images/icon/updateBill_32.png')" id="updateBill" label="Update Bill" useHandCursor="true" buttonMode="true" 
 						  click="getUpdate()"/>
 				<mx:VRule height="30" />
-				<mx:LinkButton icon="@Embed('./images/icon/cancelBill_32.png')" id="cancelBill" label="Cancel Bill" useHandCursor="true" buttonMode="true" 
+				<mx:LinkButton icon="@Embed('/images/icon/cancelBill_32.png')" id="cancelBill" label="Cancel Bill" useHandCursor="true" buttonMode="true" 
 						  click="getCancel()"/>
 			</s:HGroup>
 			<mx:HRule width="100%" />

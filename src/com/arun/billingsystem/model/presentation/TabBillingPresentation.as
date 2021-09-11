@@ -29,7 +29,7 @@ package com.arun.billingsystem.model.presentation
 		[Inject(source="homePresentation")]
 		public var homePresentation:HomePresentation;
 		
-		[Embed(source="./images/icon/deleteTab_12.png")]
+		[Embed(source="/images/icon/deleteTab_12.png")]
 		public var deleteTabImg:Class;
 		
 		public var tabBilling:TabBilling;

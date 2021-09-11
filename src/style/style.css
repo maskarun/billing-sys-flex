@@ -131,7 +131,7 @@ global{
 }
 .panelStyle
 {
-	backgroundImage:Embed(source='./images/header.png');
+	backgroundImage:Embed(source='/images/header.png');
 	left:10;
 	right:0;
 	color:#161616;

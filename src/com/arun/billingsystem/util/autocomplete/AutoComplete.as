@@ -152,6 +152,8 @@ package com.arun.billingsystem.util.autocomplete {
 					var value:String = LabelUtil.itemToLabel(item, labelArr[i], labelFunction);
 					if (value.toLowerCase() == enteredText.toLowerCase()) {
 						isMatch = true;   
+					} else if(value.toLocaleLowerCase() == defaultCode.toLowerCase()) {
+						isMatch = true;
 					}
 				}
 			}
@@ -206,12 +208,18 @@ package com.arun.billingsystem.util.autocomplete {
             if (_collection.length > 0 && list.selectedIndex >= 0) {
                 _completionAccepted = true;                
                 selectedItem = _collection.getItemAt(list.selectedIndex);
+				//Update sold price for default item
+				if(selectedItem != null && defaultCode != null && !isNaN(Number(valueText))){ 
+					if(selectedItem.itemCode == defaultCode) {
+						selectedItem.soldPrice = Number(valueText);
+					}
+				}
                 hidePopUp();
             }
             else {
 				_completionAccepted = false;
 				selectedItem = null;
-				//todo: add default itemcode when collection is not found
+				//add default itemcode when collection is not found
 				if(defaultCode != null && !isNaN(Number(valueText))){
 					_collection.filterFunction = defaultFilterFunction;
 					_collection.refresh();
@@ -271,7 +279,7 @@ package com.arun.billingsystem.util.autocomplete {
 			if(item == null){
 				return "";
 			}
-			return item["category"] + " - " + item["itemCode"] +" - "+ item["soldPrice"];
+			return item["itemName"] + "("+ item["size"]+") : " + item["itemCode"] +" : "+ item["soldPrice"];
 //			return design;
 		}
         

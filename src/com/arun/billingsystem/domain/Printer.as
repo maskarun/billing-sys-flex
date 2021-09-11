@@ -20,5 +20,6 @@ package com.arun.billingsystem.domain
 		public var sgst:String;
 		public var gst:String;
 		public var includeGSTAmt:Boolean;
+		public var printerNamesArr:ArrayCollection;
 	}
 }

@@ -45,8 +45,7 @@
 			public function loadAppResultHandler(result:ResultEvent):void {
 				var loadApp:LoadApp = result.result as LoadApp;
 				Login.loadApp = loadApp;
-				if(loadApp.name == null || loadApp.name == "" || loadApp.categorys == null || loadApp.categorys.length == 0 
-					|| loadApp.sizeList == null || loadApp.sizeList.length == 0){
+				if(loadApp.userList == null || loadApp.userList.length == 0 ){
 					SettingPopUp.show(loadApp);
 				} else {
 					loadDetail(loadApp);	

@@ -28,9 +28,9 @@
 			[Bindable]private var showText:String;
 			private static var showAlert:ShowAlert;
 			
-			[Bindable][Embed(source="./images/Warning.png")]
+			[Bindable][Embed(source="/images/Warning.png")]
 			private var warningImg:Class;
-			[Bindable][Embed(source="./images/Success.png")]
+			[Bindable][Embed(source="/images/Success.png")]
 			private var successImg:Class;
 			
 			public static function show(text:String, popUptype:String, showImg:String, purchase:Purchase=null):void {

@@ -23,9 +23,9 @@
 			import spark.events.IndexChangeEvent;
 			
 			
-			[Bindable][Embed(source="./images/Report.png")]
+			[Bindable][Embed(source="/images/Report.png")]
 			private var ReportImg:Class;
-			[Bindable][Embed(source="./images/Sales.png")]
+			[Bindable][Embed(source="/images/Sales.png")]
 			private var SalesImg:Class;
 			[Inject(source="reportPresentation")]
 			public var reportPresentation:ReportPresentation;
@@ -40,11 +40,11 @@
 	<s:VGroup width="100%" height="100%">
 		<s:BorderContainer width="100%" styleName="panelStyle">
 			<s:HGroup width="100%" paddingLeft="5" paddingTop="10">
-				<mx:LinkButton icon="@Embed('./images/icon/sales_32.png')" id="saleReportLnkBut" label="Sales Report" click="reportPresentation.salesMenu_buttonBarClickHanlder()"/>
+				<mx:LinkButton icon="@Embed('/images/icon/sales_32.png')" id="saleReportLnkBut" label="Sales Report" click="reportPresentation.salesMenu_buttonBarClickHanlder()"/>
 				<mx:VRule height="30" />
-				<mx:LinkButton icon="@Embed('./images/icon/employee_32.png')" id="employeeLnkBut" label="Employee Report" click="reportPresentation.employeeMenu_buttonBarClickHanlder()"/>
+				<mx:LinkButton icon="@Embed('/images/icon/employee_32.png')" id="employeeLnkBut" label="Employee Report" click="reportPresentation.employeeMenu_buttonBarClickHanlder()"/>
 				<mx:VRule height="30" />
-				<mx:LinkButton icon="@Embed('./images/icon/purchase_32.png')" id="purchaseLnkBut" label="Purchase Report" click="reportPresentation.purchaseMenu_buttonBarClickHanlder()"/>
+				<mx:LinkButton icon="@Embed('/images/icon/purchase_32.png')" id="purchaseLnkBut" label="Purchase Report" click="reportPresentation.purchaseMenu_buttonBarClickHanlder()"/>
 				<s:HGroup width="100%" horizontalAlign="right">
 					<mx:DateField id="showFromDate" visible="false" selectedDate="{new Date()}" formatString="{FormatUtil.DATE_PICKER_FORMAT}" 
 								  change="reportPresentation.search_creationCompleteHandler(false, true)"/>

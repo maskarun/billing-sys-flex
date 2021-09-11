@@ -25,10 +25,10 @@
 			<mx:VBox width="100%">
 				<mx:HBox width="100%" height="100%">
 					<mx:HBox width="100%" paddingTop="12" paddingLeft="5">
-						<mx:LinkButton icon="@Embed('./images/icon/addstock_32.png')" id="addButton" label="Add Stock"
+						<mx:LinkButton icon="@Embed('/images/icon/addstock_32.png')" id="addButton" label="Add Stock"
 								  click="stockPresentation.stockAdd_clickHandler()"/>
 						<mx:VRule height="30" />
-						<mx:LinkButton icon="@Embed('./images/icon/search_32.png')" label="Search"
+						<mx:LinkButton icon="@Embed('/images/icon/search_32.png')" label="Search"
 									   click="stockPresentation.stockViewSearch_hander()"/>
 					</mx:HBox>
 				</mx:HBox>

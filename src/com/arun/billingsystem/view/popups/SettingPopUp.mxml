@@ -115,14 +115,15 @@
 			
 			protected function printer_VBox():void {
 				isPrintLoad = true;
-				var printerNames:Vector.<String> = PrintJob.printers;
-				var deviceName:ArrayCollection = new ArrayCollection();
-				if(printerNames){
-					for(var i:int=0; i<printerNames.length;i++){
-						deviceName.addItem(printerNames[i]);
-					}
-				}
+				// var printerNames:Vector.<String> = PrintJob.printers;
+				// var deviceName:ArrayCollection = new ArrayCollection();
+				// if(printerNames){
+				// 	for(var i:int=0; i<printerNames.length;i++){
+				// 		deviceName.addItem(printerNames[i]);
+				// 	}
+				// }
 				namesTxtInput.text = loadApp.name;
+				var deviceName:ArrayCollection = loadApp.printer.printerNamesArr;
 				printerNameCmb.dataProvider = deviceName;
 				labelPrinterNameCmb.dataProvider = deviceName;
 				if(loadApp.printer != null){

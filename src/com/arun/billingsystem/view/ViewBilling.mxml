@@ -23,15 +23,15 @@
 			<mx:VBox width="100%">
 				<mx:HBox width="100%" height="100%" paddingTop="12">
 					<mx:HBox width="100%" paddingLeft="5" horizontalGap="2">
-						<mx:LinkButton icon="@Embed('./images/icon/viewBilling_32.png')" label="View Bills" useHandCursor="true" buttonMode="true" click="viewBillingPresentation.viewBilling_Click()"/>
+						<mx:LinkButton icon="@Embed('/images/icon/viewBilling_32.png')" label="View Bills" useHandCursor="true" buttonMode="true" click="viewBillingPresentation.viewBilling_Click()"/>
 						<mx:VRule height="30" />
-						<mx:LinkButton icon="@Embed('./images/icon/cancelBill_32.png')" label="Clear Bills"  useHandCursor="true" buttonMode="true" click="viewBillingPresentation.clearBilling_Click()"/>
+						<mx:LinkButton icon="@Embed('/images/icon/cancelBill_32.png')" label="Clear Bills"  useHandCursor="true" buttonMode="true" click="viewBillingPresentation.clearBilling_Click()"/>
 					</mx:HBox>
 					<mx:HBox height="100%" horizontalAlign="right" verticalAlign="middle" paddingRight="10">
 						<mx:Label text="View Date : " />
 						<mx:DateField id="viewDate" formatString="{FormatUtil.DATE_PICKER_FORMAT}" selectedDate="{new Date()}" 
 									  change="viewBillingPresentation.viewBilling_creationCompleteHandler()"/>
-						<mx:LinkButton icon="@Embed('./images/icon/print_32.png')" id="printSaleBtn" toolTip="Print Sales" styleName="DefaultButton" useHandCursor="true" buttonMode="true"
+						<mx:LinkButton icon="@Embed('/images/icon/print_32.png')" id="printSaleBtn" toolTip="Print Sales" styleName="DefaultButton" useHandCursor="true" buttonMode="true"
 								  click="viewBillingPresentation.printSale_clickHandler()"/>
 					</mx:HBox>
 				</mx:HBox>

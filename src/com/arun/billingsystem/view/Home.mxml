@@ -36,7 +36,7 @@
 					<mx:Label id="logOut" selectable="true" text="Sign Out" useHandCursor="true" buttonMode="true" mouseChildren="false" paddingRight="5"
 							  styleName="linkMouseOut" mouseOver="{logOut.styleName='linkMouseOver'}" mouseOut="{logOut.styleName='linkMouseOut'}" 
 							  click="homePresentation.logOut_clickHandler()"/>
-					<s:Image source="@Embed('./images/icon/setting_28.png')" id="setting" useHandCursor="true" buttonMode="true"
+					<s:Image source="@Embed('/images/icon/setting_28.png')" id="setting" useHandCursor="true" buttonMode="true"
 								   click="setting_clickHandler(event)"/>
 				</s:HGroup>
 			</mx:ApplicationControlBar>
